@@ -1,0 +1,350 @@
+PRD — Nutritionist Platform (All EPICs 1–21)
+Minimalistic LLM‑Optimized Version
+
+EPIC 1 — User & Authentication System
+User Stories
+As a nutritionist, I want to create an account so I can access the platform.
+
+As a user, I want to log in using email/password so I can securely access my data.
+
+As a user, I want to reset my password so I can recover access.
+
+As an admin, I want to manage user roles (Lite, Premium, Business) so I can control feature access.
+
+As a business account owner, I want to add/remove team members so I can manage my clinic staff.
+
+EPIC 2 — Patient Management
+User Stories
+As a nutritionist, I want to register new patients so I can manage their consultations.
+
+As a nutritionist, I want to store patient personal data, goals, and medical history so I can personalize treatment.
+
+As a nutritionist, I want to upload documents (labs, reports) so I can reference them during consultations.
+
+As a nutritionist, I want to view a timeline of patient interactions so I can track progress.
+
+As a nutritionist, I want to search and filter patients so I can quickly find records.
+
+EPIC 3 — Consultation Management
+User Stories
+As a nutritionist, I want to schedule consultations so I can organize my agenda.
+
+As a nutritionist, I want to create consultation notes so I can document each session.
+
+As a nutritionist, I want to reuse templates for consultation notes so I can save time.
+
+As a nutritionist, I want to attach files to consultations so I can keep everything in one place.
+
+As a patient, I want to receive reminders so I don’t miss appointments.
+
+EPIC 4 — Agenda & Scheduling
+User Stories
+As a nutritionist, I want a calendar view so I can visualize my schedule.
+
+As a nutritionist, I want to define available hours so patients can book automatically.
+
+As a patient, I want to book appointments online so I can choose a convenient time.
+
+As a nutritionist, I want to sync my agenda with Google Calendar so I avoid conflicts.
+
+As a nutritionist, I want to block unavailable times so I can manage my workload.
+
+EPIC 5 — AI‑Powered Meal Plan Generator
+User Stories
+As a nutritionist, I want to generate meal plans using AI so I can save time.
+
+As a nutritionist, I want to customize AI‑generated plans so I can adapt them to each patient.
+
+As a nutritionist, I want to save meal plan templates so I can reuse them.
+
+As a patient, I want to view my meal plan in a mobile‑friendly format so I can follow it easily.
+
+As a nutritionist, I want to export meal plans as PDF so I can share them externally.
+
+EPIC 6 — Financial Management
+User Stories
+As a nutritionist, I want to register payments so I can track revenue.
+
+As a nutritionist, I want to generate invoices so I can maintain financial compliance.
+
+As a nutritionist, I want to track overdue payments so I can follow up with patients.
+
+As a business owner, I want financial dashboards so I can understand my clinic’s performance.
+
+As a nutritionist, I want to integrate with Stripe/PagSeguro so I can accept online payments.
+
+EPIC 7 — Content & Studies Module
+User Stories
+As a nutritionist, I want to access educational content so I can improve my practice.
+
+As an admin, I want to upload new study materials so I can keep the library updated.
+
+As a user, I want to bookmark content so I can revisit it later.
+
+As a user, I want to search studies by topic so I can find relevant material.
+
+EPIC 8 — Chat & Communication
+User Stories
+As a nutritionist, I want to chat with patients so I can provide ongoing support.
+
+As a patient, I want to send messages to my nutritionist so I can ask questions.
+
+As a nutritionist, I want to send broadcast messages so I can notify all patients.
+
+As a nutritionist, I want to attach files in chat so I can share documents.
+
+EPIC 9 — Digital Contracts & Signatures
+User Stories
+As a nutritionist, I want to create digital contracts so I can formalize agreements.
+
+As a patient, I want to sign contracts online so I can complete onboarding quickly.
+
+As a nutritionist, I want to store signed contracts so I can access them later.
+
+As an admin, I want to manage contract templates so I can standardize documents.
+
+EPIC 10 — Customization & Branding
+User Stories
+As a nutritionist, I want to customize my profile with logo and colors so I can reinforce my brand.
+
+As a nutritionist, I want to personalize patient documents so they reflect my clinic identity.
+
+As a business owner, I want to configure subdomains so my team can access a branded portal.
+
+EPIC 11 — Landing Page / Blog Builder
+User Stories
+As a nutritionist, I want to create a landing page so I can attract new clients.
+
+As a nutritionist, I want to publish blog posts so I can share knowledge.
+
+As a nutritionist, I want SEO tools so I can improve visibility.
+
+As a nutritionist, I want analytics so I can measure page performance.
+
+EPIC 12 — Subscription & Billing System
+User Stories
+As a user, I want to choose between Lite, Premium, and Business plans so I can select the right features.
+
+As a user, I want to pay monthly or annually so I can manage my budget.
+
+As an admin, I want to enforce feature restrictions based on plan so I can maintain pricing tiers.
+
+As a user, I want a 30‑day trial so I can test the platform before paying.
+
+As an admin, I want to process refunds so I can honor the satisfaction guarantee.
+
+EPIC 13 — Support & Helpdesk
+User Stories
+As a user, I want to access support chat so I can resolve issues quickly.
+
+As a user, I want a knowledge base so I can learn how to use the platform.
+
+As an admin, I want to manage support tickets so I can track user issues.
+
+EPIC 14 — Accessibility & Compliance
+User Stories
+As a user with disabilities, I want accessibility tools so I can use the platform comfortably.
+
+As an admin, I want to ensure compliance with LGPD/GDPR so user data is protected.
+
+As a nutritionist, I want HIPAA‑compliant storage (if applicable) so I can handle sensitive data.
+
+EPIC 15 — Platform Administration
+User Stories
+As an admin, I want dashboards showing usage metrics so I can monitor platform health.
+
+As an admin, I want to manage feature flags so I can roll out updates safely.
+
+As an admin, I want to manage system‑wide settings so I can control global behavior.
+
+EPIC 16 — Marketing & CRM Tools
+User Stories
+As a nutritionist, I want to send email campaigns so I can engage my audience.
+
+As a nutritionist, I want to segment patients so I can target specific groups.
+
+As a nutritionist, I want to track campaign performance so I can optimize my strategy.
+
+EPIC 17 — Analytics & Reporting
+User Stories
+As a nutritionist, I want patient progress charts so I can evaluate results.
+
+As a business owner, I want revenue reports so I can track growth.
+
+As a nutritionist, I want consultation statistics so I can optimize my schedule.
+
+EPIC 18 — Mobile Experience
+User Stories
+As a patient, I want a mobile‑friendly interface so I can access my plan anywhere.
+
+As a nutritionist, I want push notifications so I can stay updated.
+
+As a patient, I want offline access to my meal plan so I can use it without internet.
+
+EPIC 19 — Integrations
+User Stories
+As a nutritionist, I want Google Calendar sync so I can avoid double‑booking.
+
+As a nutritionist, I want payment gateway integration so I can charge clients.
+
+As a nutritionist, I want WhatsApp integration so I can communicate easily.
+
+EPIC 20 — Security & Infrastructure
+User Stories
+As an admin, I want encrypted data storage so I can protect user information.
+
+As an admin, I want audit logs so I can track system activity.
+
+As an admin, I want automated backups so I can prevent data loss.
+
+As an admin, I want multi‑region deployment so I can ensure uptime.
+
+EPIC 21 — Regulatory Compliance (EU Data Boundaries, GDPR, HIPAA)
+Goal
+Ensure the platform meets strict regulatory requirements for handling personal and health data across the EU and US, including data residency, consent, privacy rights, and secure processing.
+
+1. EU Data Residency & Data Boundaries
+User Stories
+As a European nutritionist, I want all my patient data stored exclusively within the EU so I can comply with local regulations.
+
+As an admin, I want to enforce regional data boundaries so data never leaves the EU without explicit consent.
+
+As a system architect, I want to ensure backups, logs, and analytics also remain within EU‑approved regions.
+
+Acceptance Criteria
+All primary and secondary storage located in EU regions (Azure West Europe/North Europe).
+
+No cross‑region replication unless explicitly configured.
+
+Data processing by sub‑processors restricted to EU‑approved regions.
+
+2. GDPR — Lawful Basis & Consent
+User Stories
+As a patient, I want to give explicit consent for data processing so I understand how my data is used.
+
+As a nutritionist, I want to record and manage patient consent so I can comply with GDPR.
+
+As a patient, I want to withdraw consent at any time so I can control my personal data.
+
+Acceptance Criteria
+Consent stored with timestamp, version, and purpose.
+
+Withdrawal triggers automatic revocation of access and optional data deletion.
+
+Consent logs immutable and exportable.
+
+3. GDPR — Right to Access (Art. 15)
+User Stories
+As a patient, I want to request a copy of all my data so I can review what is stored about me.
+
+Acceptance Criteria
+Export includes: profile, consultations, meal plans, messages, documents, logs.
+
+Export delivered in machine‑readable format (JSON/CSV/PDF bundle).
+
+Delivered within legally required timeframe.
+
+4. GDPR — Right to Erasure (Art. 17)
+User Stories
+As a patient, I want to request deletion of my data so I can exercise my privacy rights.
+
+Acceptance Criteria
+Soft‑delete workflow for legal retention periods.
+
+Full purge after retention expires.
+
+Audit log preserved but anonymized.
+
+5. GDPR — Data Minimization & Purpose Limitation
+User Stories
+As an admin, I want the system to collect only necessary data so we comply with GDPR principles.
+
+Acceptance Criteria
+No unnecessary fields in patient profiles.
+
+Optional fields clearly marked.
+
+Analytics uses anonymized or pseudonymized data.
+
+6. GDPR — Data Processing Agreements
+User Stories
+As a business owner, I want DPAs available so I can legally onboard clients.
+
+Acceptance Criteria
+DPA templates available for download.
+
+Signed DPAs stored per account.
+
+Sub‑processor list published and versioned.
+
+7. HIPAA — PHI Protection
+User Stories
+As a US nutritionist, I want PHI stored securely so I comply with HIPAA.
+
+As an admin, I want audit trails for all PHI access so I can detect unauthorized access.
+
+Acceptance Criteria
+Encryption in transit (TLS 1.2+) and at rest (AES‑256).
+
+Role‑based access control (RBAC) with least privilege.
+
+Full audit logs: who accessed what, when, and from where.
+
+Automatic log retention for minimum 6 years.
+
+Business Associate Agreement (BAA) available.
+
+8. HIPAA — Breach Notification
+User Stories
+As an admin, I want automated breach detection so I can respond quickly.
+
+Acceptance Criteria
+Alerts for anomalous access patterns.
+
+Incident response workflow documented.
+
+Notification templates for affected users.
+
+9. Data Encryption & Key Management
+User Stories
+As a security engineer, I want centralized key management so encryption is consistent.
+
+Acceptance Criteria
+Keys stored in HSM (Azure Key Vault).
+
+Key rotation policies enforced.
+
+No plaintext secrets in logs or code.
+
+10. Privacy by Design & Default
+User Stories
+As a product owner, I want all new features to undergo privacy review so we maintain compliance.
+
+Acceptance Criteria
+DPIA required for new modules.
+
+Privacy checklist integrated into development workflow.
+
+Feature flags used to isolate sensitive features.
+
+11. Data Retention Policies
+User Stories
+As an admin, I want configurable retention rules so I can meet local legal requirements.
+
+Acceptance Criteria
+Retention per data type (consultations, messages, documents).
+
+Automatic cleanup jobs.
+
+Retention logs for auditing.
+
+12. Secure Data Transfer
+User Stories
+As a system architect, I want secure APIs so data is protected during integration.
+
+Acceptance Criteria
+OAuth2 / OpenID Connect for authentication.
+
+No PHI in URL parameters.
+
+Rate limiting and anomaly detection.
