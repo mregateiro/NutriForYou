@@ -36,7 +36,7 @@ The MVP must allow a nutritionist to **sign up, manage patients, conduct consult
 | **P0** | 5 | AI-Powered Meal Plan Generator | MVP Phase 1 | Key differentiator. Nutritionists expect meal-plan delivery as a basic output of consultations. |
 | **P1** | 4 | Agenda & Scheduling | MVP Phase 2 | Needed for self-service booking and calendar management; not blocking initial manual workflows. |
 | **P1** | 12 | Subscription & Billing System | MVP Phase 2 | Required to monetise the platform before public launch; can be manual/Stripe-only initially. |
-| **P1** | 14 | Accessibility & Compliance | MVP Phase 2 | LGPD/GDPR baseline must ship before public launch with real user data. |
+| **P1** | 14 | Accessibility & Compliance | MVP Phase 2 | GDPR (EU) and LGPD (Brazil) baseline must ship before public launch with real user data. |
 | **P1** | 18 | Mobile Experience | MVP Phase 2 | Patients expect mobile-friendly meal plans; responsive web is sufficient for MVP. |
 | **P1** | 6 | Financial Management | MVP Phase 2 | Nutritionists need basic payment tracking; invoicing can be simple at first. |
 | **P2** | 8 | Chat & Communication | Post-MVP | Valuable for engagement but email/WhatsApp fills the gap initially. |
