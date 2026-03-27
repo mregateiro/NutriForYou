@@ -35,6 +35,16 @@ export default function SettingsPage() {
             Clinic logo, colors, and organization details.
           </p>
         </Link>
+
+        <Link
+          href="/settings/integrations"
+          className="bg-white shadow rounded-lg p-6 hover:shadow-md transition-shadow"
+        >
+          <h2 className="text-lg font-semibold text-gray-900">Integrations</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Connect Google Calendar, WhatsApp, Stripe, and more.
+          </p>
+        </Link>
       </div>
     </div>
   )

@@ -14,6 +14,10 @@ const NAV_ITEMS = [
   { href: '/contracts', label: 'Contracts' },
   { href: '/finances', label: 'Finances' },
   { href: '/analytics', label: 'Analytics' },
+  { href: '/content', label: 'Content' },
+  { href: '/blog', label: 'Blog' },
+  { href: '/marketing', label: 'Marketing' },
+  { href: '/support', label: 'Support' },
   { href: '/notifications', label: 'Notifications' },
   { href: '/settings', label: 'Settings' },
 ]
