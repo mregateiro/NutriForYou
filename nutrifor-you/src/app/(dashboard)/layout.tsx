@@ -1,5 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { authOptions } from '@/lib/auth'
 
 export default async function DashboardLayout({
@@ -21,28 +22,28 @@ export default async function DashboardLayout({
             <div className="flex items-center space-x-8">
               <span className="text-xl font-bold text-indigo-600">NutriForYou</span>
               <div className="hidden md:flex space-x-4">
-                <a href="/dashboard" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                <Link href="/dashboard" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
                   Dashboard
-                </a>
-                <a href="/patients" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                </Link>
+                <Link href="/patients" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
                   Patients
-                </a>
-                <a href="/consultations" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                </Link>
+                <Link href="/consultations" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
                   Consultations
-                </a>
-                <a href="/meal-plans" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                </Link>
+                <Link href="/meal-plans" className="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
                   Meal Plans
-                </a>
+                </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-500">{session.user.email}</span>
-              <a
+              <Link
                 href="/api/auth/signout"
                 className="text-sm text-gray-700 hover:text-red-600"
               >
                 Sign out
-              </a>
+              </Link>
             </div>
           </div>
         </div>

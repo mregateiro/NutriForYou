@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
@@ -15,7 +15,8 @@ export async function GET(
   }
 
   try {
-    const mealPlan = await getMealPlanById(params.id, session.user.id)
+    const { id } = await params
+    const mealPlan = await getMealPlanById(id, session.user.id)
     if (!mealPlan) {
       return NextResponse.json({ error: 'Meal plan not found' }, { status: 404 })
     }
@@ -28,7 +29,7 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
@@ -36,6 +37,7 @@ export async function PATCH(
   }
 
   try {
+    const { id } = await params
     const body = await req.json()
     const validation = updateMealPlanSchema.safeParse(body)
 
@@ -43,7 +45,7 @@ export async function PATCH(
       return NextResponse.json({ error: validation.error.errors[0].message }, { status: 400 })
     }
 
-    const mealPlan = await updateMealPlan(params.id, session.user.id, validation.data)
+    const mealPlan = await updateMealPlan(id, session.user.id, validation.data)
     return NextResponse.json({ data: mealPlan })
   } catch (error) {
     if ((error as Error).message === 'Meal plan not found') {
@@ -56,7 +58,7 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
@@ -64,7 +66,8 @@ export async function DELETE(
   }
 
   try {
-    await deleteMealPlan(params.id, session.user.id)
+    const { id } = await params
+    await deleteMealPlan(id, session.user.id)
     return NextResponse.json({ message: 'Meal plan deleted' })
   } catch (error) {
     if ((error as Error).message === 'Meal plan not found') {

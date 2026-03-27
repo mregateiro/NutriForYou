@@ -3,7 +3,6 @@ import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'crypt
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 16
 const TAG_LENGTH = 16
-const SALT_LENGTH = 32
 
 function getKey(): Buffer {
   const key = process.env.ENCRYPTION_KEY

@@ -6,7 +6,7 @@ import { logger } from '@/lib/logger'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
@@ -14,7 +14,8 @@ export async function GET(
   }
 
   try {
-    const timeline = await getPatientTimeline(params.id, session.user.id)
+    const { id } = await params
+    const timeline = await getPatientTimeline(id, session.user.id)
     return NextResponse.json({ data: timeline })
   } catch (error) {
     if ((error as Error).message === 'Patient not found') {

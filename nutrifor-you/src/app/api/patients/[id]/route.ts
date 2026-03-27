@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger'
 // GET — get patient by ID
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
@@ -16,7 +16,8 @@ export async function GET(
   }
 
   try {
-    const patient = await getPatientById(params.id, session.user.id)
+    const { id } = await params
+    const patient = await getPatientById(id, session.user.id)
 
     if (!patient) {
       return NextResponse.json({ error: 'Patient not found' }, { status: 404 })
@@ -32,7 +33,7 @@ export async function GET(
 // PATCH — update patient
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
@@ -40,6 +41,7 @@ export async function PATCH(
   }
 
   try {
+    const { id } = await params
     const body = await req.json()
     const validation = updatePatientSchema.safeParse(body)
 
@@ -50,7 +52,7 @@ export async function PATCH(
       )
     }
 
-    const patient = await updatePatient(params.id, session.user.id, validation.data)
+    const patient = await updatePatient(id, session.user.id, validation.data)
     return NextResponse.json({ data: patient })
   } catch (error) {
     if ((error as Error).message === 'Patient not found') {
@@ -64,7 +66,7 @@ export async function PATCH(
 // DELETE — soft delete patient
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
@@ -72,7 +74,8 @@ export async function DELETE(
   }
 
   try {
-    await deletePatient(params.id, session.user.id)
+    const { id } = await params
+    await deletePatient(id, session.user.id)
     return NextResponse.json({ message: 'Patient deleted' })
   } catch (error) {
     if ((error as Error).message === 'Patient not found') {

@@ -62,9 +62,9 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.role = (user as Record<string, unknown>).role
-        token.subscriptionTier = (user as Record<string, unknown>).subscriptionTier
-        token.organizationId = (user as Record<string, unknown>).organizationId
+        token.role = (user as { role?: string }).role as string
+        token.subscriptionTier = (user as { subscriptionTier?: string }).subscriptionTier as string
+        token.organizationId = (user as { organizationId?: string | null }).organizationId ?? null
       }
       return token
     },

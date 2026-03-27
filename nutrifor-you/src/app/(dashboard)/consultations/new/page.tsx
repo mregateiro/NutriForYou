@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -16,7 +16,7 @@ interface Template {
   content: string
 }
 
-export default function NewConsultationPage() {
+function NewConsultationForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const preselectedPatientId = searchParams.get('patientId')
@@ -236,5 +236,13 @@ export default function NewConsultationPage() {
         </div>
       </form>
     </div>
+  )
+}
+
+export default function NewConsultationPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-12 text-gray-500">Loading...</div>}>
+      <NewConsultationForm />
+    </Suspense>
   )
 }

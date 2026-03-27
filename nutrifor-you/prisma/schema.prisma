@@ -424,6 +424,7 @@ model Appointment {
 
   nutritionist    User     @relation("NutritionistAppointments", fields: [nutritionistId], references: [id])
   patient         Patient  @relation(fields: [patientId], references: [id])
+  patientUser     User?    @relation("PatientAppointments", fields: [patientId], references: [id], map: "appointments_patient_user_fkey")
   consultation    Consultation?
 
   @@index([nutritionistId, startsAt])

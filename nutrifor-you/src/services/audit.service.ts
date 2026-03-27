@@ -1,4 +1,4 @@
-import { AuditAction } from '@prisma/client'
+import { AuditAction, Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 
@@ -20,7 +20,7 @@ export async function createAuditLog(input: AuditLogInput): Promise<void> {
         action: input.action,
         entity: input.entity,
         entityId: input.entityId,
-        details: input.details ?? undefined,
+        details: input.details ? (input.details as Prisma.InputJsonValue) : undefined,
         ipAddress: input.ipAddress,
         userAgent: input.userAgent,
       },

@@ -23,8 +23,8 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     id: string
-    role: UserRole
-    subscriptionTier: SubscriptionTier
+    role: string
+    subscriptionTier: string
     organizationId: string | null
   }
 }

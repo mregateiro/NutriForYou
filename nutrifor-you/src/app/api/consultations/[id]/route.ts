@@ -7,7 +7,7 @@ import { logger } from '@/lib/logger'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
@@ -15,7 +15,8 @@ export async function GET(
   }
 
   try {
-    const consultation = await getConsultationById(params.id, session.user.id)
+    const { id } = await params
+    const consultation = await getConsultationById(id, session.user.id)
     if (!consultation) {
       return NextResponse.json({ error: 'Consultation not found' }, { status: 404 })
     }
@@ -28,7 +29,7 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
@@ -36,6 +37,7 @@ export async function PATCH(
   }
 
   try {
+    const { id } = await params
     const body = await req.json()
     const validation = updateConsultationSchema.safeParse(body)
 
@@ -46,7 +48,7 @@ export async function PATCH(
       )
     }
 
-    const consultation = await updateConsultation(params.id, session.user.id, validation.data)
+    const consultation = await updateConsultation(id, session.user.id, validation.data)
     return NextResponse.json({ data: consultation })
   } catch (error) {
     if ((error as Error).message === 'Consultation not found') {
@@ -59,7 +61,7 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions)
   if (!session?.user) {
@@ -67,7 +69,8 @@ export async function DELETE(
   }
 
   try {
-    await deleteConsultation(params.id, session.user.id)
+    const { id } = await params
+    await deleteConsultation(id, session.user.id)
     return NextResponse.json({ message: 'Consultation deleted' })
   } catch (error) {
     if ((error as Error).message === 'Consultation not found') {
