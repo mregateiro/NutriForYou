@@ -1,0 +1,16 @@
+{
+  "name": "NutriForYou",
+  "short_name": "NutriForYou",
+  "description": "All-in-one SaaS platform for nutritionists",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#F3F4F6",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
