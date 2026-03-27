@@ -224,6 +224,20 @@ model User {
   auditLogs         AuditLog[]
   payments          Payment[]        @relation("PaymentRecorder")
 
+  // P3 EPICs relations
+  submittedTickets  SupportTicket[]  @relation("userTickets")
+  assignedTickets   SupportTicket[]  @relation("assignedTickets")
+  ticketReplies     TicketReply[]
+  kbArticles        KnowledgeBaseArticle[]
+  integrations      Integration[]
+  contentArticles   ContentArticle[]
+  studyReferences   StudyReference[]
+  blogPosts         BlogPost[]
+  landingPages      LandingPage[]
+  campaigns         Campaign[]
+  emailTemplates    EmailTemplate[]
+  contactSegments   ContactSegment[]
+
   @@index([email])
   @@index([organizationId])
   @@index([role])
@@ -780,4 +794,312 @@ model FeatureFlag {
   updatedAt   DateTime @updatedAt
 
   @@map("feature_flags")
+}
+
+// ─── EPIC 13 — Support & Helpdesk ──────────────────────────
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_ON_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model SupportTicket {
+  id          String         @id @default(cuid())
+  userId      String
+  subject     String
+  description String
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  category    String?
+  assignedTo  String?
+  resolvedAt  DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  user     User            @relation("userTickets", fields: [userId], references: [id])
+  assignee User?           @relation("assignedTickets", fields: [assignedTo], references: [id])
+  replies  TicketReply[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([assignedTo])
+  @@map("support_tickets")
+}
+
+model TicketReply {
+  id        String   @id @default(cuid())
+  ticketId  String
+  userId    String
+  message   String
+  isStaff   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User          @relation(fields: [userId], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_replies")
+}
+
+model KnowledgeBaseArticle {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String
+  category    String
+  tags        String[] @default([])
+  isPublished Boolean  @default(false)
+  authorId    String
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([category])
+  @@index([isPublished])
+  @@map("knowledge_base_articles")
+}
+
+// ─── EPIC 19 — Integrations ────────────────────────────────
+
+enum IntegrationProvider {
+  GOOGLE_CALENDAR
+  WHATSAPP
+  STRIPE
+  PAGSEGURO
+  ZOOM
+  WEBHOOK
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  DISCONNECTED
+  ERROR
+  PENDING
+}
+
+model Integration {
+  id         String              @id @default(cuid())
+  userId     String
+  provider   IntegrationProvider
+  status     IntegrationStatus   @default(PENDING)
+  config     Json?
+  metadata   Json?
+  lastSyncAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id])
+  webhookLogs WebhookLog[]
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@map("integrations")
+}
+
+model WebhookLog {
+  id            String   @id @default(cuid())
+  integrationId String
+  event         String
+  payload       Json?
+  response      Json?
+  statusCode    Int?
+  success       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  integration Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@index([integrationId])
+  @@index([createdAt])
+  @@map("webhook_logs")
+}
+
+// ─── EPIC 7 — Content & Studies Module ─────────────────────
+
+enum ContentType {
+  ARTICLE
+  VIDEO
+  INFOGRAPHIC
+  STUDY
+  GUIDE
+}
+
+model ContentArticle {
+  id           String      @id @default(cuid())
+  title        String
+  slug         String      @unique
+  summary      String?
+  content      String
+  contentType  ContentType @default(ARTICLE)
+  category     String
+  tags         String[]    @default([])
+  coverImageUrl String?
+  isPublished  Boolean     @default(false)
+  authorId     String
+  viewCount    Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([category])
+  @@index([isPublished])
+  @@index([contentType])
+  @@map("content_articles")
+}
+
+model StudyReference {
+  id          String   @id @default(cuid())
+  title       String
+  authors     String[]
+  journal     String?
+  year        Int?
+  doi         String?  @unique
+  url         String?
+  abstract    String?
+  tags        String[] @default([])
+  addedById   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  addedBy User @relation(fields: [addedById], references: [id])
+
+  @@index([addedById])
+  @@map("study_references")
+}
+
+// ─── EPIC 11 — Landing Page / Blog Builder ─────────────────
+
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model BlogPost {
+  id           String         @id @default(cuid())
+  title        String
+  slug         String         @unique
+  excerpt      String?
+  content      String
+  coverImageUrl String?
+  status       BlogPostStatus @default(DRAFT)
+  authorId     String
+  publishedAt  DateTime?
+  tags         String[]       @default([])
+  category     String?
+  seoTitle     String?
+  seoDescription String?
+  viewCount    Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([status])
+  @@index([authorId])
+  @@index([publishedAt])
+  @@map("blog_posts")
+}
+
+model LandingPage {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  sections    Json     @default("[]")
+  isPublished Boolean  @default(false)
+  authorId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@map("landing_pages")
+}
+
+// ─── EPIC 16 — Marketing & CRM Tools ──────────────────────
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+}
+
+enum CampaignType {
+  EMAIL
+  SMS
+  IN_APP
+}
+
+model Campaign {
+  id          String         @id @default(cuid())
+  name        String
+  type        CampaignType   @default(EMAIL)
+  status      CampaignStatus @default(DRAFT)
+  subject     String?
+  content     String
+  templateId  String?
+  segmentId   String?
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  sentCount   Int            @default(0)
+  openCount   Int            @default(0)
+  clickCount  Int            @default(0)
+  authorId    String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  author   User             @relation(fields: [authorId], references: [id])
+  template EmailTemplate?   @relation(fields: [templateId], references: [id])
+  segment  ContactSegment?  @relation(fields: [segmentId], references: [id])
+
+  @@index([status])
+  @@index([authorId])
+  @@map("campaigns")
+}
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  subject   String
+  htmlBody  String
+  variables String[] @default([])
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    User       @relation(fields: [authorId], references: [id])
+  campaigns Campaign[]
+
+  @@map("email_templates")
+}
+
+model ContactSegment {
+  id        String   @id @default(cuid())
+  name      String
+  filters   Json
+  count     Int      @default(0)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    User       @relation(fields: [authorId], references: [id])
+  campaigns Campaign[]
+
+  @@map("contact_segments")
 }
