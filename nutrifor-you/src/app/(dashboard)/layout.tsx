@@ -14,7 +14,12 @@ const NAV_ITEMS = [
   { href: '/contracts', label: 'Contracts' },
   { href: '/finances', label: 'Finances' },
   { href: '/analytics', label: 'Analytics' },
+  { href: '/notifications', label: 'Notifications' },
   { href: '/settings', label: 'Settings' },
+]
+
+const ADMIN_NAV_ITEMS = [
+  { href: '/admin', label: 'Admin' },
 ]
 
 export default async function DashboardLayout({
@@ -48,6 +53,15 @@ export default async function DashboardLayout({
                     key={item.href}
                     href={item.href}
                     className="text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-2 text-sm font-medium rounded-md transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                {session.user.role === 'ADMIN' && ADMIN_NAV_ITEMS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="text-red-700 hover:text-red-800 hover:bg-red-50 px-3 py-2 text-sm font-medium rounded-md transition-colors"
                   >
                     {item.label}
                   </Link>

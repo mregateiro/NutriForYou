@@ -25,6 +25,16 @@ export default function SettingsPage() {
             Consent preferences, data export, and account deletion.
           </p>
         </Link>
+
+        <Link
+          href="/settings/branding"
+          className="bg-white shadow rounded-lg p-6 hover:shadow-md transition-shadow"
+        >
+          <h2 className="text-lg font-semibold text-gray-900">Branding & Customization</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Clinic logo, colors, and organization details.
+          </p>
+        </Link>
       </div>
     </div>
   )
