@@ -1,4 +1,4 @@
-import { AuditAction, Prisma } from '@prisma/client'
+import { AuditAction } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { createAuditLog } from './audit.service'
 import { logger } from '@/lib/logger'
