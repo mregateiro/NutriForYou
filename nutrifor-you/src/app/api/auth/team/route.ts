@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { randomBytes } from 'crypto'
 import { getServerSession } from 'next-auth'
 import { hash } from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
@@ -82,8 +83,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Create team member with temporary password
-    const tempPassword = Math.random().toString(36).slice(-12)
+    // Create team member with cryptographically secure temporary password
+    const tempPassword = randomBytes(16).toString('base64url')
     const passwordHash = await hash(tempPassword, 12)
 
     const member = await prisma.user.create({
