@@ -10,6 +10,8 @@ const NAV_ITEMS = [
   { href: '/consultations', label: 'Consultations' },
   { href: '/meal-plans', label: 'Meal Plans' },
   { href: '/agenda', label: 'Agenda' },
+  { href: '/messages', label: 'Messages' },
+  { href: '/contracts', label: 'Contracts' },
   { href: '/finances', label: 'Finances' },
   { href: '/settings', label: 'Settings' },
 ]
