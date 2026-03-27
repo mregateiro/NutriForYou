@@ -6,6 +6,11 @@ set -euo pipefail
 
 BACKUP_DIR="${BACKUP_DIR:-/backups}"
 RETENTION_DAYS="${RETENTION_DAYS:-30}"
+
+if ! [[ "${RETENTION_DAYS}" =~ ^[1-9][0-9]*$ ]]; then
+  echo "[$(date)] ERROR: RETENTION_DAYS must be a positive integer, got '${RETENTION_DAYS}'" >&2
+  exit 1
+fi
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="${BACKUP_DIR}/nutriforyou_${TIMESTAMP}.sql.gz"
 

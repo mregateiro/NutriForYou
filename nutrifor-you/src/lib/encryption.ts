@@ -10,6 +10,9 @@ function getKey(): Buffer {
   if (!key) {
     throw new Error('ENCRYPTION_KEY environment variable is not set')
   }
+  if (!/^[0-9a-fA-F]{64}$/.test(key)) {
+    throw new Error('ENCRYPTION_KEY must be a 64-character hexadecimal string (32 bytes)')
+  }
   return Buffer.from(key, 'hex')
 }
 
@@ -55,7 +58,7 @@ export function decrypt(encryptedData: string): string {
  * Used for searching encrypted fields without decrypting all records.
  */
 export function hashForSearch(value: string): string {
-  const salt = process.env.ENCRYPTION_KEY?.substring(0, 32) || ''
+  const salt = process.env.SEARCH_HASH_SALT || 'nutriforyou-search-default-salt'
   const hash = scryptSync(value.toLowerCase(), salt, 32)
   return hash.toString('hex')
 }
