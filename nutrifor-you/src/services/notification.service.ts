@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
+import type { Prisma } from '@prisma/client'
 import type { CreateNotificationInput } from '@/validators/admin.schema'
 
 export async function createNotification(input: CreateNotificationInput) {
@@ -9,7 +10,7 @@ export async function createNotification(input: CreateNotificationInput) {
       type: input.type,
       title: input.title,
       message: input.message,
-      data: input.data ?? undefined,
+      data: (input.data ?? undefined) as Prisma.InputJsonValue | undefined,
     },
   })
 

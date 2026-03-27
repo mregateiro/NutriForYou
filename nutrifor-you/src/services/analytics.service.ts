@@ -56,7 +56,7 @@ export async function getDashboardAnalytics(nutritionistId: string) {
       prisma.appointment.count({
         where: {
           nutritionistId,
-          startTime: { gte: now },
+          startsAt: { gte: now },
           status: { in: ['SCHEDULED', 'CONFIRMED'] },
         },
       }),

@@ -23,7 +23,7 @@ export const updateUserRoleSchema = z.object({
 
 export const createNotificationSchema = z.object({
   userId: z.string().min(1),
-  type: z.enum(['APPOINTMENT_REMINDER', 'MEAL_PLAN_READY', 'MESSAGE_RECEIVED', 'PAYMENT_RECEIVED', 'CONTRACT_SIGNED', 'SYSTEM_ALERT']),
+  type: z.enum(['APPOINTMENT_REMINDER', 'APPOINTMENT_CANCELED', 'NEW_MESSAGE', 'MEAL_PLAN_READY', 'PAYMENT_DUE', 'PAYMENT_RECEIVED', 'CONTRACT_SIGNED', 'SYSTEM']),
   title: z.string().min(1).max(200),
   message: z.string().min(1).max(1000),
   data: z.record(z.unknown()).optional(),

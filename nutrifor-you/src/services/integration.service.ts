@@ -1,4 +1,4 @@
-import { AuditAction } from '@prisma/client'
+import { AuditAction, Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { createAuditLog } from './audit.service'
 import { logger } from '@/lib/logger'
@@ -11,11 +11,11 @@ export async function connectIntegration(userId: string, input: ConnectIntegrati
       userId,
       provider: input.provider,
       status: 'CONNECTED',
-      config: input.config ?? undefined,
+      config: (input.config ?? undefined) as Prisma.InputJsonValue | undefined,
     },
     update: {
       status: 'CONNECTED',
-      config: input.config ?? undefined,
+      config: (input.config ?? undefined) as Prisma.InputJsonValue | undefined,
       lastSyncAt: new Date(),
     },
   })
@@ -63,7 +63,7 @@ export async function updateIntegration(userId: string, integrationId: string, i
   const integration = await prisma.integration.update({
     where: { id: integrationId },
     data: {
-      config: input.config ?? undefined,
+      config: (input.config ?? undefined) as Prisma.InputJsonValue | undefined,
       status: input.status ?? undefined,
     },
   })

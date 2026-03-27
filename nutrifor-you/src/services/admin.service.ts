@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import type { CreateFeatureFlagInput, UpdateFeatureFlagInput } from '@/validators/admin.schema'
-import type { AuditAction, SubscriptionTier, UserRole } from '@prisma/client'
+import type { AuditAction, SubscriptionTier, UserRole, Prisma } from '@prisma/client'
 import { createAuditLog } from './audit.service'
 
 // ─── User Management ───────────────────────────────────────
@@ -119,7 +119,7 @@ export async function createFeatureFlag(
       description: input.description,
       isEnabled: input.isEnabled,
       tiers: input.tiers as SubscriptionTier[],
-      metadata: input.metadata ?? undefined,
+      metadata: (input.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
     },
   })
 
@@ -150,7 +150,7 @@ export async function updateFeatureFlag(
       description: input.description,
       isEnabled: input.isEnabled,
       tiers: input.tiers as SubscriptionTier[] | undefined,
-      metadata: input.metadata ?? undefined,
+      metadata: (input.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
     },
   })
 
