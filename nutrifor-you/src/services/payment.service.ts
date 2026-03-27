@@ -4,6 +4,18 @@ import { createAuditLog } from './audit.service'
 import { logger } from '@/lib/logger'
 import type { CreatePaymentInput, UpdatePaymentInput, CreateInvoiceInput, UpdateInvoiceInput } from '@/validators/payment.schema'
 
+function resolvePaidAt(paidAtInput?: string, status?: string): Date | undefined {
+  if (paidAtInput) return new Date(paidAtInput)
+  if (status === 'COMPLETED') return new Date()
+  return undefined
+}
+
+function resolvePaidAtForUpdate(paidAtInput?: string, newStatus?: string, existingStatus?: string): Date | undefined {
+  if (paidAtInput) return new Date(paidAtInput)
+  if (newStatus === 'COMPLETED' && existingStatus !== 'COMPLETED') return new Date()
+  return undefined
+}
+
 // ─── Payments ──────────────────────────────────────────────
 
 export async function createPayment(
@@ -25,7 +37,7 @@ export async function createPayment(
       method: input.method,
       description: input.description,
       status: input.status,
-      paidAt: input.paidAt ? new Date(input.paidAt) : input.status === 'COMPLETED' ? new Date() : undefined,
+      paidAt: resolvePaidAt(input.paidAt, input.status),
     },
     include: {
       patient: { select: { id: true, firstName: true, lastName: true } },
@@ -70,9 +82,7 @@ export async function updatePayment(
     where: { id },
     data: {
       ...input,
-      paidAt: input.paidAt ? new Date(input.paidAt)
-        : input.status === 'COMPLETED' && existing.status !== 'COMPLETED' ? new Date()
-        : undefined,
+      paidAt: resolvePaidAtForUpdate(input.paidAt, input.status, existing.status),
     },
   })
 
