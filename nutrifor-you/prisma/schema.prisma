@@ -1,0 +1,1105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────
+
+enum UserRole {
+  ADMIN
+  NUTRITIONIST
+  PATIENT
+}
+
+enum SubscriptionTier {
+  TRIAL
+  LITE
+  PREMIUM
+  BUSINESS
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  PAUSED
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+  NO_SHOW
+}
+
+enum MealPlanStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELED
+}
+
+enum ContractStatus {
+  DRAFT
+  SENT
+  SIGNED
+  EXPIRED
+  REVOKED
+}
+
+enum DocumentType {
+  LAB_REPORT
+  MEDICAL_RECORD
+  PRESCRIPTION
+  PHOTO
+  CONTRACT
+  INVOICE
+  OTHER
+}
+
+enum ConsentPurpose {
+  DATA_PROCESSING
+  MARKETING
+  THIRD_PARTY_SHARING
+  HEALTH_DATA_PROCESSING
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  IMPORT
+}
+
+enum NotificationType {
+  APPOINTMENT_REMINDER
+  APPOINTMENT_CANCELED
+  NEW_MESSAGE
+  MEAL_PLAN_READY
+  PAYMENT_DUE
+  PAYMENT_RECEIVED
+  CONTRACT_SIGNED
+  SYSTEM
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum MealType {
+  BREAKFAST
+  MORNING_SNACK
+  LUNCH
+  AFTERNOON_SNACK
+  DINNER
+  EVENING_SNACK
+}
+
+enum MessageType {
+  TEXT
+  FILE
+  IMAGE
+  SYSTEM
+}
+
+// ─── NextAuth.js Required Models ────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── User ───────────────────────────────────────────────────
+
+model User {
+  id                String           @id @default(cuid())
+  email             String           @unique
+  emailVerified     DateTime?
+  passwordHash      String?
+  name              String?
+  firstName         String?
+  lastName          String?
+  phone             String?
+  avatarUrl         String?
+  role              UserRole         @default(NUTRITIONIST)
+  subscriptionTier  SubscriptionTier @default(TRIAL)
+  isActive          Boolean          @default(true)
+  organizationId    String?
+  timezone          String           @default("UTC")
+  locale            String           @default("en")
+  lastLoginAt       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  organization      Organization?    @relation(fields: [organizationId], references: [id])
+  accounts          Account[]
+  sessions          Session[]
+  subscription      Subscription?
+
+  patients          Patient[]        @relation("NutritionistPatients")
+  consultations     Consultation[]   @relation("NutritionistConsultations")
+  appointmentsAsNutritionist Appointment[] @relation("NutritionistAppointments")
+  mealPlans         MealPlan[]       @relation("NutritionistMealPlans")
+  availabilityRules AvailabilityRule[]
+  consultationTemplates ConsultationTemplate[]
+  mealPlanTemplates MealPlanTemplate[]
+
+  patientProfile    Patient?         @relation("PatientUser")
+  appointmentsAsPatient Appointment[] @relation("PatientAppointments")
+
+  documents         Document[]       @relation("UploadedDocuments")
+  contracts         Contract[]       @relation("ContractCreator")
+  chatParticipants  ChatParticipant[]
+  sentMessages      ChatMessage[]    @relation("MessageSender")
+  notifications     Notification[]
+  consents          Consent[]
+  auditLogs         AuditLog[]
+  payments          Payment[]        @relation("PaymentRecorder")
+
+  // P3 EPICs relations
+  submittedTickets  SupportTicket[]  @relation("userTickets")
+  assignedTickets   SupportTicket[]  @relation("assignedTickets")
+  ticketReplies     TicketReply[]
+  kbArticles        KnowledgeBaseArticle[]
+  integrations      Integration[]
+  contentArticles   ContentArticle[]
+  studyReferences   StudyReference[]
+  blogPosts         BlogPost[]
+  landingPages      LandingPage[]
+  campaigns         Campaign[]
+  emailTemplates    EmailTemplate[]
+  contactSegments   ContactSegment[]
+
+  @@index([email])
+  @@index([organizationId])
+  @@index([role])
+  @@map("users")
+}
+
+// ─── Organization ──────────────────────────────────────────
+
+model Organization {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  subdomain      String?  @unique
+  logoUrl        String?
+  primaryColor   String?  @default("#4F46E5")
+  secondaryColor String?  @default("#10B981")
+  website        String?
+  phone          String?
+  address        String?
+  city           String?
+  state          String?
+  country        String?  @default("BR")
+  postalCode     String?
+  taxId          String?
+  dataRegion     String   @default("us-east-1")
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  members     User[]
+
+  @@index([slug])
+  @@map("organizations")
+}
+
+// ─── Subscription ──────────────────────────────────────────
+
+model Subscription {
+  id               String             @id @default(cuid())
+  userId           String             @unique
+  tier             SubscriptionTier   @default(TRIAL)
+  status           SubscriptionStatus @default(TRIALING)
+  stripeCustomerId String?
+  stripeSubId      String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  trialEndsAt      DateTime?
+  canceledAt       DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([stripeCustomerId])
+  @@map("subscriptions")
+}
+
+// ─── Patient ───────────────────────────────────────────────
+
+model Patient {
+  id               String    @id @default(cuid())
+  nutritionistId   String
+  userId           String?   @unique
+  firstName        String
+  lastName         String
+  email            String?
+  phone            String?
+  dateOfBirth      DateTime?
+  gender           String?
+  cpf              String?
+  address          String?
+  city             String?
+  state            String?
+  country          String?   @default("BR")
+  goals            String?   @db.Text
+  medicalHistory   String?   @db.Text
+  allergies        String[]  @default([])
+  dietaryRestrictions String[] @default([])
+  currentMedications String[] @default([])
+  height           Float?
+  weight           Float?
+  targetWeight     Float?
+  activityLevel    String?
+  notes            String?   @db.Text
+  isActive         Boolean   @default(true)
+  deletedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  nutritionist     User      @relation("NutritionistPatients", fields: [nutritionistId], references: [id])
+  user             User?     @relation("PatientUser", fields: [userId], references: [id])
+  consultations    Consultation[]
+  appointments     Appointment[]
+  mealPlans        MealPlan[]
+  documents        Document[]
+  contracts        Contract[]
+  payments         Payment[]
+  weightEntries    WeightEntry[]
+
+  @@index([nutritionistId])
+  @@index([email])
+  @@index([firstName, lastName])
+  @@index([createdAt])
+  @@map("patients")
+}
+
+model WeightEntry {
+  id        String   @id @default(cuid())
+  patientId String
+  weight    Float
+  notes     String?
+  recordedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId, recordedAt])
+  @@map("weight_entries")
+}
+
+// ─── Consultation ──────────────────────────────────────────
+
+model Consultation {
+  id              String    @id @default(cuid())
+  patientId       String
+  nutritionistId  String
+  appointmentId   String?   @unique
+  templateId      String?
+  title           String?
+  chiefComplaint  String?   @db.Text
+  notes           String?   @db.Text
+  assessment      String?   @db.Text
+  plan            String?   @db.Text
+  privateNotes    String?   @db.Text
+  duration        Int?
+  weight          Float?
+  height          Float?
+  bmi             Float?
+  bodyFat         Float?
+  waistCirc       Float?
+  hipCirc         Float?
+  status          String    @default("COMPLETED")
+  scheduledAt     DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  patient         Patient   @relation(fields: [patientId], references: [id])
+  nutritionist    User      @relation("NutritionistConsultations", fields: [nutritionistId], references: [id])
+  appointment     Appointment? @relation(fields: [appointmentId], references: [id])
+  template        ConsultationTemplate? @relation(fields: [templateId], references: [id])
+  attachments     Document[] @relation("ConsultationDocuments")
+
+  @@index([patientId])
+  @@index([nutritionistId])
+  @@index([scheduledAt])
+  @@index([createdAt])
+  @@map("consultations")
+}
+
+model ConsultationTemplate {
+  id              String   @id @default(cuid())
+  nutritionistId  String
+  name            String
+  description     String?
+  content         String   @db.Text
+  isDefault       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  nutritionist    User     @relation(fields: [nutritionistId], references: [id])
+  consultations   Consultation[]
+
+  @@index([nutritionistId])
+  @@map("consultation_templates")
+}
+
+// ─── Appointment ───────────────────────────────────────────
+
+model Appointment {
+  id              String            @id @default(cuid())
+  nutritionistId  String
+  patientId       String
+  title           String?
+  description     String?
+  startsAt        DateTime
+  endsAt          DateTime
+  status          AppointmentStatus @default(SCHEDULED)
+  type            String            @default("IN_PERSON")
+  location        String?
+  videoLink       String?
+  cancelReason    String?
+  reminderSentAt  DateTime?
+  googleEventId   String?
+  notes           String?           @db.Text
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  nutritionist    User     @relation("NutritionistAppointments", fields: [nutritionistId], references: [id])
+  patient         Patient  @relation(fields: [patientId], references: [id])
+  patientUser     User?    @relation("PatientAppointments", fields: [patientId], references: [id], map: "appointments_patient_user_fkey")
+  consultation    Consultation?
+
+  @@index([nutritionistId, startsAt])
+  @@index([patientId])
+  @@index([status])
+  @@map("appointments")
+}
+
+model AvailabilityRule {
+  id              String    @id @default(cuid())
+  nutritionistId  String
+  dayOfWeek       DayOfWeek
+  startTime       String
+  endTime         String
+  slotDuration    Int       @default(60)
+  isActive        Boolean   @default(true)
+  validFrom       DateTime?
+  validUntil      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  nutritionist    User      @relation(fields: [nutritionistId], references: [id])
+
+  @@index([nutritionistId])
+  @@map("availability_rules")
+}
+
+// ─── Meal Plan ─────────────────────────────────────────────
+
+model MealPlan {
+  id              String         @id @default(cuid())
+  patientId       String
+  nutritionistId  String
+  title           String
+  description     String?        @db.Text
+  status          MealPlanStatus @default(DRAFT)
+  startDate       DateTime?
+  endDate         DateTime?
+  totalCalories   Float?
+  totalProtein    Float?
+  totalCarbs      Float?
+  totalFat        Float?
+  aiGenerated     Boolean        @default(false)
+  aiPrompt        String?        @db.Text
+  notes           String?        @db.Text
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  patient         Patient   @relation(fields: [patientId], references: [id])
+  nutritionist    User      @relation("NutritionistMealPlans", fields: [nutritionistId], references: [id])
+  days            MealPlanDay[]
+
+  @@index([patientId])
+  @@index([nutritionistId])
+  @@index([status])
+  @@map("meal_plans")
+}
+
+model MealPlanDay {
+  id         String   @id @default(cuid())
+  mealPlanId String
+  dayOfWeek  DayOfWeek
+  date       DateTime?
+  notes      String?
+
+  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  meals      Meal[]
+
+  @@index([mealPlanId])
+  @@map("meal_plan_days")
+}
+
+model Meal {
+  id            String   @id @default(cuid())
+  mealPlanDayId String
+  mealType      MealType
+  name          String?
+  time          String?
+  notes         String?
+  totalCalories Float?
+  totalProtein  Float?
+  totalCarbs    Float?
+  totalFat      Float?
+
+  mealPlanDay   MealPlanDay @relation(fields: [mealPlanDayId], references: [id], onDelete: Cascade)
+  foodItems     FoodItem[]
+
+  @@index([mealPlanDayId])
+  @@map("meals")
+}
+
+model FoodItem {
+  id          String @id @default(cuid())
+  mealId      String
+  name        String
+  quantity    Float?
+  unit        String?
+  calories    Float?
+  protein     Float?
+  carbs       Float?
+  fat         Float?
+  fiber       Float?
+  notes       String?
+
+  meal        Meal   @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@index([mealId])
+  @@map("food_items")
+}
+
+model MealPlanTemplate {
+  id              String   @id @default(cuid())
+  nutritionistId  String
+  name            String
+  description     String?
+  content         Json
+  isPublic        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  nutritionist    User     @relation(fields: [nutritionistId], references: [id])
+
+  @@index([nutritionistId])
+  @@map("meal_plan_templates")
+}
+
+// ─── Document ──────────────────────────────────────────────
+
+model Document {
+  id              String       @id @default(cuid())
+  uploadedById    String
+  patientId       String?
+  consultationId  String?
+  type            DocumentType @default(OTHER)
+  fileName        String
+  fileSize        Int
+  mimeType        String
+  storageKey      String
+  description     String?
+  isConfidential  Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  uploadedBy      User    @relation("UploadedDocuments", fields: [uploadedById], references: [id])
+  patient         Patient? @relation(fields: [patientId], references: [id])
+  consultation    Consultation? @relation("ConsultationDocuments", fields: [consultationId], references: [id])
+
+  @@index([patientId])
+  @@index([uploadedById])
+  @@index([type])
+  @@map("documents")
+}
+
+// ─── Contract ──────────────────────────────────────────────
+
+model Contract {
+  id            String         @id @default(cuid())
+  createdById   String
+  patientId     String
+  title         String
+  content       String         @db.Text
+  status        ContractStatus @default(DRAFT)
+  signedAt      DateTime?
+  signatureData String?        @db.Text
+  expiresAt     DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  createdBy     User    @relation("ContractCreator", fields: [createdById], references: [id])
+  patient       Patient @relation(fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@index([createdById])
+  @@index([status])
+  @@map("contracts")
+}
+
+// ─── Chat ──────────────────────────────────────────────────
+
+model ChatConversation {
+  id           String   @id @default(cuid())
+  title        String?
+  isGroup      Boolean  @default(false)
+  lastMessageAt DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  participants ChatParticipant[]
+  messages     ChatMessage[]
+
+  @@map("chat_conversations")
+}
+
+model ChatParticipant {
+  id             String   @id @default(cuid())
+  conversationId String
+  userId         String
+  joinedAt       DateTime @default(now())
+  lastReadAt     DateTime?
+
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id])
+
+  @@unique([conversationId, userId])
+  @@map("chat_participants")
+}
+
+model ChatMessage {
+  id             String      @id @default(cuid())
+  conversationId String
+  senderId       String
+  type           MessageType @default(TEXT)
+  content        String      @db.Text
+  fileUrl        String?
+  isEdited       Boolean     @default(false)
+  isDeleted      Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User             @relation("MessageSender", fields: [senderId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@map("chat_messages")
+}
+
+// ─── Payment ───────────────────────────────────────────────
+
+model Payment {
+  id              String        @id @default(cuid())
+  patientId       String
+  recordedById    String
+  amount          Float
+  currency        String        @default("BRL")
+  status          PaymentStatus @default(PENDING)
+  method          String?
+  stripePaymentId String?
+  description     String?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  patient         Patient  @relation(fields: [patientId], references: [id])
+  recordedBy      User     @relation("PaymentRecorder", fields: [recordedById], references: [id])
+  invoiceItems    InvoiceItem[]
+
+  @@index([patientId])
+  @@index([status])
+  @@map("payments")
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  number      String        @unique
+  status      InvoiceStatus @default(DRAFT)
+  subtotal    Float
+  tax         Float         @default(0)
+  total       Float
+  currency    String        @default("BRL")
+  dueDate     DateTime?
+  paidAt      DateTime?
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  items       InvoiceItem[]
+
+  @@index([status])
+  @@index([dueDate])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  paymentId   String?
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Float
+  total       Float
+
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  payment     Payment? @relation(fields: [paymentId], references: [id])
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+// ─── Platform ──────────────────────────────────────────────
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  userId      String?
+  action      AuditAction
+  entity      String
+  entityId    String?
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime    @default(now())
+
+  user        User?       @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Consent {
+  id          String         @id @default(cuid())
+  userId      String
+  purpose     ConsentPurpose
+  granted     Boolean
+  version     String         @default("1.0")
+  ipAddress   String?
+  grantedAt   DateTime       @default(now())
+  revokedAt   DateTime?
+
+  user        User @relation(fields: [userId], references: [id])
+
+  @@index([userId, purpose])
+  @@map("consents")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user      User @relation(fields: [userId], references: [id])
+
+  @@index([userId, readAt])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String?
+  isEnabled   Boolean  @default(false)
+  tiers       SubscriptionTier[] @default([])
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("feature_flags")
+}
+
+// ─── EPIC 13 — Support & Helpdesk ──────────────────────────
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_ON_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model SupportTicket {
+  id          String         @id @default(cuid())
+  userId      String
+  subject     String
+  description String
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  category    String?
+  assignedTo  String?
+  resolvedAt  DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  user     User            @relation("userTickets", fields: [userId], references: [id])
+  assignee User?           @relation("assignedTickets", fields: [assignedTo], references: [id])
+  replies  TicketReply[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([assignedTo])
+  @@map("support_tickets")
+}
+
+model TicketReply {
+  id        String   @id @default(cuid())
+  ticketId  String
+  userId    String
+  message   String
+  isStaff   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User          @relation(fields: [userId], references: [id])
+
+  @@index([ticketId])
+  @@map("ticket_replies")
+}
+
+model KnowledgeBaseArticle {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String
+  category    String
+  tags        String[] @default([])
+  isPublished Boolean  @default(false)
+  authorId    String
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([category])
+  @@index([isPublished])
+  @@map("knowledge_base_articles")
+}
+
+// ─── EPIC 19 — Integrations ────────────────────────────────
+
+enum IntegrationProvider {
+  GOOGLE_CALENDAR
+  WHATSAPP
+  STRIPE
+  PAGSEGURO
+  ZOOM
+  WEBHOOK
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  DISCONNECTED
+  ERROR
+  PENDING
+}
+
+model Integration {
+  id         String              @id @default(cuid())
+  userId     String
+  provider   IntegrationProvider
+  status     IntegrationStatus   @default(PENDING)
+  config     Json?
+  metadata   Json?
+  lastSyncAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id])
+  webhookLogs WebhookLog[]
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@map("integrations")
+}
+
+model WebhookLog {
+  id            String   @id @default(cuid())
+  integrationId String
+  event         String
+  payload       Json?
+  response      Json?
+  statusCode    Int?
+  success       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  integration Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@index([integrationId])
+  @@index([createdAt])
+  @@map("webhook_logs")
+}
+
+// ─── EPIC 7 — Content & Studies Module ─────────────────────
+
+enum ContentType {
+  ARTICLE
+  VIDEO
+  INFOGRAPHIC
+  STUDY
+  GUIDE
+}
+
+model ContentArticle {
+  id           String      @id @default(cuid())
+  title        String
+  slug         String      @unique
+  summary      String?
+  content      String
+  contentType  ContentType @default(ARTICLE)
+  category     String
+  tags         String[]    @default([])
+  coverImageUrl String?
+  isPublished  Boolean     @default(false)
+  authorId     String
+  viewCount    Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([category])
+  @@index([isPublished])
+  @@index([contentType])
+  @@map("content_articles")
+}
+
+model StudyReference {
+  id          String   @id @default(cuid())
+  title       String
+  authors     String[]
+  journal     String?
+  year        Int?
+  doi         String?  @unique
+  url         String?
+  abstract    String?
+  tags        String[] @default([])
+  addedById   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  addedBy User @relation(fields: [addedById], references: [id])
+
+  @@index([addedById])
+  @@map("study_references")
+}
+
+// ─── EPIC 11 — Landing Page / Blog Builder ─────────────────
+
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model BlogPost {
+  id           String         @id @default(cuid())
+  title        String
+  slug         String         @unique
+  excerpt      String?
+  content      String
+  coverImageUrl String?
+  status       BlogPostStatus @default(DRAFT)
+  authorId     String
+  publishedAt  DateTime?
+  tags         String[]       @default([])
+  category     String?
+  seoTitle     String?
+  seoDescription String?
+  viewCount    Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([status])
+  @@index([authorId])
+  @@index([publishedAt])
+  @@map("blog_posts")
+}
+
+model LandingPage {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  sections    Json     @default("[]")
+  isPublished Boolean  @default(false)
+  authorId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id])
+
+  @@map("landing_pages")
+}
+
+// ─── EPIC 16 — Marketing & CRM Tools ──────────────────────
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+}
+
+enum CampaignType {
+  EMAIL
+  SMS
+  IN_APP
+}
+
+model Campaign {
+  id          String         @id @default(cuid())
+  name        String
+  type        CampaignType   @default(EMAIL)
+  status      CampaignStatus @default(DRAFT)
+  subject     String?
+  content     String
+  templateId  String?
+  segmentId   String?
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  sentCount   Int            @default(0)
+  openCount   Int            @default(0)
+  clickCount  Int            @default(0)
+  authorId    String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  author   User             @relation(fields: [authorId], references: [id])
+  template EmailTemplate?   @relation(fields: [templateId], references: [id])
+  segment  ContactSegment?  @relation(fields: [segmentId], references: [id])
+
+  @@index([status])
+  @@index([authorId])
+  @@map("campaigns")
+}
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  subject   String
+  htmlBody  String
+  variables String[] @default([])
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    User       @relation(fields: [authorId], references: [id])
+  campaigns Campaign[]
+
+  @@map("email_templates")
+}
+
+model ContactSegment {
+  id        String   @id @default(cuid())
+  name      String
+  filters   Json
+  count     Int      @default(0)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    User       @relation(fields: [authorId], references: [id])
+  campaigns Campaign[]
+
+  @@map("contact_segments")
+}
