@@ -23,7 +23,9 @@ interface AIMealPlanDay {
 }
 
 /**
- * Generate a meal plan using AI (OpenAI GPT-4o).
+ * Generate a meal plan using AI.
+ * Supports OpenRouter (default), OpenAI, or any OpenAI-compatible provider.
+ * Configure via AI_BASE_URL, AI_API_KEY, and AI_MODEL env vars.
  * Falls back to a structured template if AI is unavailable.
  */
 export async function generateMealPlan(
@@ -41,9 +43,9 @@ export async function generateMealPlan(
   let days: AIMealPlanDay[]
 
   try {
-    days = await callOpenAI(prompt)
+    days = await callAI(prompt)
   } catch (error) {
-    logger.warn({ error }, 'OpenAI call failed, using fallback template')
+    logger.warn({ error }, 'AI call failed, using fallback template')
     days = generateFallbackPlan(input)
   }
 
@@ -134,20 +136,23 @@ ${input.restrictions ? `Additional restrictions: ${input.restrictions}` : ''}
 Return a JSON array of days, each with meals containing food items with nutritional info.`
 }
 
-async function callOpenAI(prompt: string): Promise<AIMealPlanDay[]> {
-  const apiKey = process.env.OPENAI_API_KEY
+async function callAI(prompt: string): Promise<AIMealPlanDay[]> {
+  const apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY
   if (!apiKey || apiKey === 'sk-...') {
-    throw new Error('OpenAI API key not configured')
+    throw new Error('AI API key not configured. Set AI_API_KEY (or OPENAI_API_KEY).')
   }
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const baseUrl = process.env.AI_BASE_URL || 'https://openrouter.ai/api/v1'
+  const model = process.env.AI_MODEL || 'openai/gpt-4o'
+
+  const response = await fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model,
       messages: [
         {
           role: 'system',
@@ -163,13 +168,13 @@ async function callOpenAI(prompt: string): Promise<AIMealPlanDay[]> {
 
   if (!response.ok) {
     const errorText = await response.text()
-    throw new Error(`OpenAI API error: ${response.status} ${errorText}`)
+    throw new Error(`AI API error (${baseUrl}): ${response.status} ${errorText}`)
   }
 
   const data = await response.json()
   const content = data.choices[0]?.message?.content
 
-  if (!content) throw new Error('Empty response from OpenAI')
+  if (!content) throw new Error('Empty response from AI')
 
   const parsed = JSON.parse(content)
   return parsed.days || parsed
