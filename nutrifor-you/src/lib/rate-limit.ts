@@ -12,13 +12,26 @@ const DEFAULT_CONFIG: RateLimitConfig = {
 
 /**
  * Simple in-memory rate limiter.
- * For production, use Redis-based rate limiting.
+ * Note: In serverless environments (e.g. Vercel), each function instance
+ * has its own memory, so rate limiting is per-instance only.
+ * For distributed rate limiting, use Redis (e.g. Upstash).
  */
 export function checkRateLimit(
   identifier: string,
   config: RateLimitConfig = DEFAULT_CONFIG
 ): { allowed: boolean; remaining: number; resetIn: number } {
   const now = Date.now()
+
+  // Lazy cleanup: remove expired entries on each call to avoid memory leaks
+  // without relying on setInterval (which is problematic in serverless)
+  if (rateLimitMap.size > 1000) {
+    for (const [key, value] of rateLimitMap) {
+      if (now > value.resetTime) {
+        rateLimitMap.delete(key)
+      }
+    }
+  }
+
   const entry = rateLimitMap.get(identifier)
 
   if (!entry || now > entry.resetTime) {
@@ -41,16 +54,4 @@ export function checkRateLimit(
     remaining: config.maxRequests - entry.count,
     resetIn: entry.resetTime - now,
   }
-}
-
-// Clean up expired entries periodically
-if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
-    const now = Date.now()
-    for (const [key, value] of rateLimitMap) {
-      if (now > value.resetTime) {
-        rateLimitMap.delete(key)
-      }
-    }
-  }, 60 * 1000)
 }
