@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const createPaymentSchema = z.object({
   patientId: z.string().min(1, 'Patient is required'),
   amount: z.number().positive('Amount must be positive'),
-  currency: z.string().default('BRL'),
+  currency: z.string().default('EUR'),
   method: z.string().optional(),
   description: z.string().optional(),
   status: z.enum(['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED']).default('PENDING'),
@@ -26,7 +26,7 @@ export const createInvoiceSchema = z.object({
     paymentId: z.string().optional(),
   })).min(1, 'At least one item is required'),
   tax: z.number().min(0).default(0),
-  currency: z.string().default('BRL'),
+  currency: z.string().default('EUR'),
   dueDate: z.string().optional(),
   notes: z.string().optional(),
 })

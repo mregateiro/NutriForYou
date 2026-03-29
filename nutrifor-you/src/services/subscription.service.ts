@@ -132,7 +132,7 @@ export function getSubscriptionLimits(subscriptionTier: string) {
 }
 
 export const PRICING = {
-  LITE: { monthly: 29.90, annual: 299.00, currency: 'BRL' },
-  PREMIUM: { monthly: 79.90, annual: 799.00, currency: 'BRL' },
-  BUSINESS: { monthly: 149.90, annual: 1499.00, currency: 'BRL' },
+  LITE: { monthly: 9.90, annual: 99.00, currency: 'EUR' },
+  PREMIUM: { monthly: 24.90, annual: 249.00, currency: 'EUR' },
+  BUSINESS: { monthly: 49.90, annual: 499.00, currency: 'EUR' },
 } as const

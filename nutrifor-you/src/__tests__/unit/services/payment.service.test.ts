@@ -31,7 +31,7 @@ describe('createPayment', () => {
     const input = {
       patientId: patient.id,
       amount: 150,
-      currency: 'BRL',
+      currency: 'EUR',
       method: 'CREDIT_CARD',
       description: 'Consultation fee',
       status: 'PENDING',
@@ -48,7 +48,7 @@ describe('createPayment', () => {
           patientId: patient.id,
           recordedById: NUTRITIONIST_ID,
           amount: 150,
-          currency: 'BRL',
+          currency: 'EUR',
           status: 'PENDING',
         }),
       }),
@@ -73,7 +73,7 @@ describe('createPayment', () => {
     const input = {
       patientId: 'non-existent',
       amount: 100,
-      currency: 'BRL',
+      currency: 'EUR',
       method: 'PIX',
       description: 'Test',
       status: 'PENDING',
@@ -94,7 +94,7 @@ describe('createPayment', () => {
     const input = {
       patientId: patient.id,
       amount: 200,
-      currency: 'BRL',
+      currency: 'EUR',
       method: 'CREDIT_CARD',
       description: 'Completed payment',
       status: 'COMPLETED',
@@ -123,7 +123,7 @@ describe('createPayment', () => {
     const input = {
       patientId: patient.id,
       amount: 100,
-      currency: 'BRL',
+      currency: 'EUR',
       method: 'PIX',
       description: 'Test',
       status: 'PENDING',
@@ -374,7 +374,7 @@ describe('createInvoice', () => {
 
     const { createInvoice } = await import('@/services/payment.service')
     const input = {
-      currency: 'BRL',
+      currency: 'EUR',
       tax: 10,
       items: [{ description: 'Consultation', quantity: 2, unitPrice: 75 }],
     }
@@ -392,7 +392,7 @@ describe('createInvoice', () => {
         subtotal: 150,
         tax: 10,
         total: 160,
-        currency: 'BRL',
+        currency: 'EUR',
         items: {
           create: [
             expect.objectContaining({
@@ -426,7 +426,7 @@ describe('createInvoice', () => {
 
     const { createInvoice } = await import('@/services/payment.service')
     const input = {
-      currency: 'BRL',
+      currency: 'EUR',
       items: [{ description: 'Single session', quantity: 1, unitPrice: 75 }],
     }
 
@@ -450,7 +450,7 @@ describe('createInvoice', () => {
 
     const { createInvoice } = await import('@/services/payment.service')
     const input = {
-      currency: 'BRL',
+      currency: 'EUR',
       dueDate: '2025-12-31',
       notes: 'Please pay on time',
       items: [{ description: 'Session', quantity: 1, unitPrice: 100 }],
@@ -474,7 +474,7 @@ describe('createInvoice', () => {
 
     const { createInvoice } = await import('@/services/payment.service')
     const input = {
-      currency: 'BRL',
+      currency: 'EUR',
       items: [
         { description: 'Consultation', quantity: 2, unitPrice: 100 },
         { description: 'Meal Plan', quantity: 3, unitPrice: 50 },
