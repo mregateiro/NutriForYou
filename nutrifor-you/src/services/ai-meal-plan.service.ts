@@ -22,6 +22,10 @@ interface AIMealPlanDay {
   }[]
 }
 
+const MEAL_TYPES = ['BREAKFAST', 'MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK', 'DINNER', 'EVENING_SNACK'] as const
+const MEAL_TIMES = ['07:00', '10:00', '12:30', '15:30', '19:00', '21:00'] as const
+const DAY_NAMES = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const
+
 /**
  * Generate a meal plan using AI.
  * Supports OpenRouter (default), OpenAI, or any OpenAI-compatible provider.
@@ -52,7 +56,6 @@ export async function generateMealPlan(
   }
 
   // Create meal plan in database
-  const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
 
   const mealPlan = await prisma.mealPlan.create({
     data: {
@@ -68,7 +71,7 @@ export async function generateMealPlan(
       notes: usedFallback ? 'AI_FALLBACK' : null,
       days: {
         create: days.map((day, index) => ({
-          dayOfWeek: (day.dayOfWeek || dayNames[index % 7]) as 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY',
+          dayOfWeek: (day.dayOfWeek || DAY_NAMES[index % 7]) as 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY',
           meals: {
             create: day.meals.map(meal => ({
               mealType: meal.mealType as 'BREAKFAST' | 'MORNING_SNACK' | 'LUNCH' | 'AFTERNOON_SNACK' | 'DINNER' | 'EVENING_SNACK',
@@ -121,8 +124,7 @@ function buildPrompt(
   patient: { firstName: string; lastName: string; weight: number | null; height: number | null; targetWeight: number | null; allergies: string[]; dietaryRestrictions: string[]; goals: string | null; activityLevel: string | null },
   input: GenerateMealPlanInput
 ): string {
-  const mealTypeList = ['BREAKFAST', 'MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK', 'DINNER', 'EVENING_SNACK']
-  const requestedMealTypes = mealTypeList.slice(0, input.mealsPerDay)
+  const requestedMealTypes = MEAL_TYPES.slice(0, input.mealsPerDay)
 
   return `Generate a ${input.numberOfDays}-day meal plan with ${input.mealsPerDay} meals per day.
 
@@ -304,28 +306,24 @@ const SAMPLE_FOODS: Record<string, { name: string; quantity: number; unit: strin
 }
 
 function generateFallbackPlan(input: GenerateMealPlanInput): AIMealPlanDay[] {
-  const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY']
-  const mealTypes = ['BREAKFAST', 'MORNING_SNACK', 'LUNCH', 'AFTERNOON_SNACK', 'DINNER', 'EVENING_SNACK']
-  const mealTimes = ['07:00', '10:00', '12:30', '15:30', '19:00', '21:00']
-
   const days: AIMealPlanDay[] = []
   for (let i = 0; i < input.numberOfDays; i++) {
     const meals = []
     for (let j = 0; j < input.mealsPerDay; j++) {
-      const mealType = mealTypes[j]
-      const sampleVariants = SAMPLE_FOODS[mealType] || SAMPLE_FOODS.LUNCH
+      const mealType = MEAL_TYPES[j]
+      const sampleVariants = SAMPLE_FOODS[mealType]
       const variant = sampleVariants[i % sampleVariants.length]
 
       meals.push({
         mealType,
         name: `${mealType.replace(/_/g, ' ').toLowerCase()} — Day ${i + 1}`,
-        time: mealTimes[j],
+        time: MEAL_TIMES[j],
         foodItems: variant.map(fi => ({ ...fi })),
       })
     }
 
     days.push({
-      dayOfWeek: dayNames[i % 7],
+      dayOfWeek: DAY_NAMES[i % 7],
       meals,
     })
   }
