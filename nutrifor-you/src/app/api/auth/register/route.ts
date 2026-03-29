@@ -64,9 +64,10 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
-    logger.error({ error }, 'Registration failed')
+    const message = error instanceof Error ? error.message : String(error)
+    logger.error({ error: message }, 'Registration failed')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Registration failed. Please try again later.' },
       { status: 500 }
     )
   }
