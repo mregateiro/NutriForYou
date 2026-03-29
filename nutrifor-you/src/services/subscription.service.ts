@@ -44,7 +44,7 @@ export async function changeSubscription(
     periodEnd.setMonth(periodEnd.getMonth() + 1)
   }
 
-  // Set status to PAST_DUE until payment is confirmed
+  // Set status to PAST_DUE to gate activation behind payment confirmation
   const subscription = await prisma.subscription.update({
     where: { id: existing.id },
     data: {
