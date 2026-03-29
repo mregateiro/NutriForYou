@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "installCommand": "cd nutrifor-you && npm install",
+  "buildCommand": "cd nutrifor-you && npm run build",
+  "outputDirectory": "nutrifor-you/.next"
+}
