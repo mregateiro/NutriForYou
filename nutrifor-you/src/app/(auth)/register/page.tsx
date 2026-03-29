@@ -64,7 +64,7 @@ export default function RegisterPage() {
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+          <div role="alert" aria-live="assertive" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
             {error}
           </div>
         )}
@@ -79,6 +79,7 @@ export default function RegisterPage() {
               name="firstName"
               type="text"
               required
+              aria-required="true"
               value={formData.firstName}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -93,6 +94,7 @@ export default function RegisterPage() {
               name="lastName"
               type="text"
               required
+              aria-required="true"
               value={formData.lastName}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -109,6 +111,7 @@ export default function RegisterPage() {
             name="email"
             type="email"
             required
+            aria-required="true"
             value={formData.email}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -124,11 +127,13 @@ export default function RegisterPage() {
             name="password"
             type="password"
             required
+            aria-required="true"
+            aria-describedby="password-requirements"
             value={formData.password}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
-          <p className="mt-1 text-xs text-gray-500">
+          <p id="password-requirements" className="mt-1 text-xs text-gray-500">
             Min 8 characters, 1 uppercase, 1 lowercase, 1 number
           </p>
         </div>
@@ -142,6 +147,7 @@ export default function RegisterPage() {
             name="confirmPassword"
             type="password"
             required
+            aria-required="true"
             value={formData.confirmPassword}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -151,14 +157,14 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Creating account...' : 'Create account'}
         </button>
 
         <p className="text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500 underline">
             Sign in
           </Link>
         </p>
