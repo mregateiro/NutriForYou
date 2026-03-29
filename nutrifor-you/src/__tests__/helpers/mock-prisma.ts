@@ -1,13 +1,12 @@
 import { vi } from 'vitest'
+import { prisma as prismaMock } from '@/lib/prisma'
 
 /**
  * Returns the mocked Prisma client from the global mock.
  * Use this to set up return values for Prisma calls in tests.
  */
 export function getMockedPrisma() {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { prisma } = require('@/lib/prisma')
-  return prisma as Record<string, Record<string, ReturnType<typeof vi.fn>>>
+  return prismaMock as unknown as Record<string, Record<string, ReturnType<typeof vi.fn>>>
 }
 
 /**
