@@ -50,6 +50,7 @@ export default function AuditLogsPage() {
         <select
           value={entityFilter}
           onChange={(e) => { setEntityFilter(e.target.value); setPage(1) }}
+          aria-label="Filter by entity type"
           className="rounded-md border border-gray-300 px-3 py-2 text-sm"
         >
           <option value="">All entities</option>
@@ -63,6 +64,7 @@ export default function AuditLogsPage() {
         <select
           value={actionFilter}
           onChange={(e) => { setActionFilter(e.target.value); setPage(1) }}
+          aria-label="Filter by action type"
           className="rounded-md border border-gray-300 px-3 py-2 text-sm"
         >
           <option value="">All actions</option>
@@ -85,11 +87,11 @@ export default function AuditLogsPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entity</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entity</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -107,7 +109,7 @@ export default function AuditLogsPage() {
                         log.action === 'UPDATE' ? 'bg-blue-100 text-blue-700' :
                         log.action === 'DELETE' ? 'bg-red-100 text-red-700' :
                         'bg-gray-100 text-gray-700'
-                      }`}>{log.action}</span>
+                      }`}>{log.action === 'CREATE' ? '+ ' : log.action === 'UPDATE' ? '✎ ' : log.action === 'DELETE' ? '✕ ' : '● '}{log.action}</span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700">{log.entity}</td>
                     <td className="px-4 py-3 text-xs text-gray-500 max-w-xs truncate">

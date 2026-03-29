@@ -77,7 +77,7 @@ export default function MealPlansPage() {
                     : mp.status === 'ARCHIVED' ? 'bg-gray-100 text-gray-700'
                     : 'bg-yellow-100 text-yellow-700'
                   }`}>
-                    {mp.status}
+                    {mp.status === 'ACTIVE' ? '✓ ' : mp.status === 'ARCHIVED' ? '▪ ' : '● '}{mp.status}
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">

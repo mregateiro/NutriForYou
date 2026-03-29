@@ -39,6 +39,13 @@ const STATUS_COLORS: Record<string, string> = {
   REFUNDED: 'bg-gray-100 text-gray-800',
 }
 
+const STATUS_ICONS: Record<string, string> = {
+  PENDING: '◷',
+  COMPLETED: '✓',
+  FAILED: '✕',
+  REFUNDED: '↩',
+}
+
 export default function FinancesPage() {
   const [tab, setTab] = useState<'overview' | 'payments'>('overview')
   const [summary, setSummary] = useState<FinancialSummary | null>(null)
@@ -159,7 +166,7 @@ export default function FinancesPage() {
                         {formatCurrency(payment.amount, payment.currency)}
                       </p>
                       <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${STATUS_COLORS[payment.status] || ''}`}>
-                        {payment.status}
+                        {STATUS_ICONS[payment.status] || '●'} {payment.status}
                       </span>
                     </div>
                   </div>
@@ -181,11 +188,11 @@ export default function FinancesPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -204,7 +211,7 @@ export default function FinancesPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${STATUS_COLORS[payment.status] || ''}`}>
-                          {payment.status}
+                          {STATUS_ICONS[payment.status] || '●'} {payment.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

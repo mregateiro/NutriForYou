@@ -23,6 +23,15 @@ const STATUS_COLORS: Record<string, string> = {
   NO_SHOW: 'bg-orange-100 text-orange-800',
 }
 
+const STATUS_ICONS: Record<string, string> = {
+  SCHEDULED: '◷',
+  CONFIRMED: '✓',
+  IN_PROGRESS: '▶',
+  COMPLETED: '✔',
+  CANCELED: '✕',
+  NO_SHOW: '⊘',
+}
+
 export default function AgendaPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
@@ -103,8 +112,9 @@ export default function AgendaPage() {
 
       <div className="flex flex-col sm:flex-row gap-4 mb-4">
         <div className="flex gap-2 items-center">
-          <label className="text-sm text-gray-600">From:</label>
+          <label htmlFor="dateFrom" className="text-sm text-gray-600">From:</label>
           <input
+            id="dateFrom"
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
@@ -112,8 +122,9 @@ export default function AgendaPage() {
           />
         </div>
         <div className="flex gap-2 items-center">
-          <label className="text-sm text-gray-600">To:</label>
+          <label htmlFor="dateTo" className="text-sm text-gray-600">To:</label>
           <input
+            id="dateTo"
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
@@ -150,11 +161,11 @@ export default function AgendaPage() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -174,11 +185,11 @@ export default function AgendaPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${STATUS_COLORS[apt.status] || 'bg-gray-100 text-gray-800'}`}>
-                      {apt.status}
+                      {STATUS_ICONS[apt.status] || '●'} {apt.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <Link href={`/agenda/${apt.id}`} className="text-indigo-600 hover:text-indigo-500">
+                    <Link href={`/agenda/${apt.id}`} className="text-indigo-600 hover:text-indigo-500 underline" aria-label={`View appointment for ${apt.patient.firstName} ${apt.patient.lastName}`}>
                       View
                     </Link>
                   </td>
@@ -213,7 +224,7 @@ export default function AgendaPage() {
                       </div>
                     </div>
                     <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${STATUS_COLORS[apt.status] || 'bg-gray-100 text-gray-800'}`}>
-                      {apt.status}
+                      {STATUS_ICONS[apt.status] || '●'} {apt.status}
                     </span>
                   </Link>
                 ))}

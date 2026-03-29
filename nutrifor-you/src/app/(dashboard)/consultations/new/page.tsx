@@ -103,16 +103,18 @@ function NewConsultationForm() {
 
       <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">{error}</div>
+          <div role="alert" aria-live="assertive" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">{error}</div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Patient *</label>
+            <label htmlFor="patientSelect" className="block text-sm font-medium text-gray-700">Patient <span aria-hidden="true">*</span></label>
             <select
+              id="patientSelect"
               value={formData.patientId}
               onChange={(e) => setFormData(prev => ({ ...prev, patientId: e.target.value }))}
               required
+              aria-required="true"
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             >
               <option value="">Select patient...</option>
@@ -122,8 +124,9 @@ function NewConsultationForm() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Template</label>
+            <label htmlFor="templateSelect" className="block text-sm font-medium text-gray-700">Template</label>
             <select
+              id="templateSelect"
               onChange={(e) => applyTemplate(e.target.value)}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             >
@@ -136,8 +139,9 @@ function NewConsultationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Title</label>
+          <label htmlFor="consultTitle" className="block text-sm font-medium text-gray-700">Title</label>
           <input
+            id="consultTitle"
             value={formData.title}
             onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -145,8 +149,9 @@ function NewConsultationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Chief Complaint</label>
+          <label htmlFor="chiefComplaint" className="block text-sm font-medium text-gray-700">Chief Complaint</label>
           <textarea
+            id="chiefComplaint"
             value={formData.chiefComplaint}
             onChange={(e) => setFormData(prev => ({ ...prev, chiefComplaint: e.target.value }))}
             rows={2}
@@ -158,18 +163,18 @@ function NewConsultationForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Weight (kg)</label>
-            <input type="number" step="0.1" value={formData.weight} onChange={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
+            <label htmlFor="consultWeight" className="block text-sm font-medium text-gray-700">Weight (kg)</label>
+            <input id="consultWeight" type="number" step="0.1" value={formData.weight} onChange={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Height (cm)</label>
-            <input type="number" step="0.1" value={formData.height} onChange={(e) => setFormData(prev => ({ ...prev, height: e.target.value }))}
+            <label htmlFor="consultHeight" className="block text-sm font-medium text-gray-700">Height (cm)</label>
+            <input id="consultHeight" type="number" step="0.1" value={formData.height} onChange={(e) => setFormData(prev => ({ ...prev, height: e.target.value }))}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Duration (min)</label>
-            <input type="number" value={formData.duration} onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
+            <label htmlFor="consultDuration" className="block text-sm font-medium text-gray-700">Duration (min)</label>
+            <input id="consultDuration" type="number" value={formData.duration} onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value }))}
               className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
           </div>
         </div>
@@ -177,8 +182,9 @@ function NewConsultationForm() {
         <h2 className="text-lg font-medium text-gray-900 border-b pb-2">Notes</h2>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Consultation Notes</label>
+          <label htmlFor="consultNotes" className="block text-sm font-medium text-gray-700">Consultation Notes</label>
           <textarea
+            id="consultNotes"
             value={formData.notes}
             onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
             rows={6}
@@ -187,8 +193,9 @@ function NewConsultationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Assessment</label>
+          <label htmlFor="consultAssessment" className="block text-sm font-medium text-gray-700">Assessment</label>
           <textarea
+            id="consultAssessment"
             value={formData.assessment}
             onChange={(e) => setFormData(prev => ({ ...prev, assessment: e.target.value }))}
             rows={3}
@@ -197,8 +204,9 @@ function NewConsultationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Plan</label>
+          <label htmlFor="consultPlan" className="block text-sm font-medium text-gray-700">Plan</label>
           <textarea
+            id="consultPlan"
             value={formData.plan}
             onChange={(e) => setFormData(prev => ({ ...prev, plan: e.target.value }))}
             rows={3}
@@ -207,8 +215,9 @@ function NewConsultationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Private Notes (not visible to patient)</label>
+          <label htmlFor="consultPrivateNotes" className="block text-sm font-medium text-gray-700">Private Notes (not visible to patient)</label>
           <textarea
+            id="consultPrivateNotes"
             value={formData.privateNotes}
             onChange={(e) => setFormData(prev => ({ ...prev, privateNotes: e.target.value }))}
             rows={2}
@@ -217,8 +226,9 @@ function NewConsultationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Status</label>
+          <label htmlFor="consultStatus" className="block text-sm font-medium text-gray-700">Status</label>
           <select
+            id="consultStatus"
             value={formData.status}
             onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -230,7 +240,7 @@ function NewConsultationForm() {
 
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Link href="/consultations" className="px-4 py-2 border rounded-md text-sm text-gray-700 hover:bg-gray-50">Cancel</Link>
-          <button type="submit" disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 disabled:opacity-50">
+          <button type="submit" disabled={loading} className="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">
             {loading ? 'Saving...' : 'Save Consultation'}
           </button>
         </div>

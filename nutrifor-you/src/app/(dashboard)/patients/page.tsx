@@ -60,6 +60,7 @@ export default function PatientsPage() {
           placeholder="Search patients by name, email, or phone..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+          aria-label="Search patients by name, email, or phone"
           className="w-full md:w-96 rounded-md border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
@@ -79,12 +80,12 @@ export default function PatientsPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consultations</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Meal Plans</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consultations</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Meal Plans</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -100,7 +101,7 @@ export default function PatientsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{patient._count.consultations}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{patient._count.mealPlans}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <Link href={`/patients/${patient.id}`} className="text-indigo-600 hover:text-indigo-500 mr-4">
+                      <Link href={`/patients/${patient.id}`} className="text-indigo-600 hover:text-indigo-500 underline mr-4" aria-label={`View patient ${patient.firstName} ${patient.lastName}`}>
                         View
                       </Link>
                     </td>

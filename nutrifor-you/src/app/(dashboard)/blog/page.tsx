@@ -23,6 +23,12 @@ const STATUS_COLORS: Record<string, string> = {
   ARCHIVED: 'bg-gray-100 text-gray-700',
 }
 
+const STATUS_ICONS: Record<string, string> = {
+  DRAFT: '●',
+  PUBLISHED: '✓',
+  ARCHIVED: '▪',
+}
+
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
@@ -83,7 +89,7 @@ export default function BlogPage() {
                   <div className="flex items-center space-x-2">
                     <h3 className="text-lg font-semibold text-gray-900">{post.title}</h3>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[post.status]}`}>
-                      {post.status}
+                      {STATUS_ICONS[post.status] || '●'} {post.status}
                     </span>
                   </div>
                   {post.excerpt && <p className="text-sm text-gray-500 mt-1">{post.excerpt}</p>}

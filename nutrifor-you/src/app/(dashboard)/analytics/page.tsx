@@ -166,7 +166,7 @@ export default function AnalyticsPage() {
                       ? 'bg-green-100 text-green-700'
                       : 'bg-yellow-100 text-yellow-700'
                   }`}>
-                    {c.status}
+                    {c.status === 'COMPLETED' ? '✓ ' : '● '}{c.status}
                   </span>
                 </div>
               ))}
