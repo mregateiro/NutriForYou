@@ -11,7 +11,7 @@ interface NavLinkProps {
 
 export function NavLink({ href, label, isAdmin }: NavLinkProps) {
   const pathname = usePathname()
-  const isActive = pathname === href || pathname.startsWith(href + '/')
+  const isActive = pathname === href || (href !== '/dashboard' && pathname.startsWith(href + '/'))
 
   const baseClasses = isAdmin
     ? 'text-red-700 hover:text-red-800 hover:bg-red-50'

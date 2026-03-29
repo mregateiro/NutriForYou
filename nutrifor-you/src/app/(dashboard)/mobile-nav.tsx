@@ -95,11 +95,11 @@ export function MobileNav({ items, email }: MobileNavProps) {
             ref={menuRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Navigation menu"
+            aria-labelledby="mobile-menu-title"
             className="fixed inset-y-0 right-0 z-50 w-64 bg-white shadow-xl"
           >
             <div className="flex items-center justify-between h-16 px-4 border-b">
-              <h2 className="text-lg font-bold text-indigo-600">Menu</h2>
+              <h2 id="mobile-menu-title" className="text-lg font-bold text-indigo-600">Menu</h2>
               <button
                 onClick={closeMenu}
                 className="p-2 rounded-md text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
