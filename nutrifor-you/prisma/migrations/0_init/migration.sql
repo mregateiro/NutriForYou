@@ -1175,4 +1175,3 @@ ALTER TABLE "email_templates" ADD CONSTRAINT "email_templates_authorId_fkey" FOR
 -- AddForeignKey
 ALTER TABLE "contact_segments" ADD CONSTRAINT "contact_segments_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
-___BEGIN___COMMAND_DONE_MARKER___0
