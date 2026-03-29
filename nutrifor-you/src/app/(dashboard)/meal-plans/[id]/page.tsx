@@ -165,6 +165,22 @@ export default function MealPlanDetailPage() {
         </div>
       </div>
 
+      {/* AI fallback warning */}
+      {mealPlan.notes === 'AI_FALLBACK' && (
+        <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4">
+          <div className="flex items-start">
+            <span className="mr-2 text-xl">⚠️</span>
+            <div>
+              <h3 className="font-semibold text-amber-800">AI generation was unavailable</h3>
+              <p className="text-sm text-amber-700 mt-1">
+                This meal plan contains sample meals as a starting template because the AI service could not be reached.
+                Please review and customize each item to fit the patient&apos;s needs.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Macro summary */}
       {mealPlan.totalCalories && (
         <div className="grid grid-cols-4 gap-4 mb-6">
