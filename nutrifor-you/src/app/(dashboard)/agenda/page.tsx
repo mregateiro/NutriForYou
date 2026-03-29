@@ -131,15 +131,19 @@ export default function AgendaPage() {
             className="rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-indigo-500 focus:outline-none"
           />
         </div>
-        <div className="flex gap-1 border rounded-md overflow-hidden">
+        <div className="flex gap-1 border rounded-md overflow-hidden" role="tablist" aria-label="View mode">
           <button
             onClick={() => setView('list')}
+            role="tab"
+            aria-selected={view === 'list'}
             className={`px-3 py-1.5 text-sm ${view === 'list' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}`}
           >
             List
           </button>
           <button
             onClick={() => setView('week')}
+            role="tab"
+            aria-selected={view === 'week'}
             className={`px-3 py-1.5 text-sm ${view === 'week' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}`}
           >
             Week

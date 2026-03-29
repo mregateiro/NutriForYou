@@ -130,7 +130,7 @@ export default function AnalyticsPage() {
         {/* Patient Growth Chart */}
         <div className="bg-white shadow rounded-lg p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Patient Growth (Last 6 Months)</h2>
-          <div className="flex items-end space-x-2 h-40">
+          <div className="flex items-end space-x-2 h-40" role="img" aria-label={`Patient growth chart showing: ${analytics.patientGrowth.map(g => `${g.month}: ${g.count} patients`).join(', ')}`}>
             {analytics.patientGrowth.map((g) => (
               <div key={g.month} className="flex-1 flex flex-col items-center">
                 <span className="text-xs text-gray-500 mb-1">{g.count}</span>
@@ -142,6 +142,24 @@ export default function AnalyticsPage() {
               </div>
             ))}
           </div>
+          {/* Accessible data table for screen readers */}
+          <table className="sr-only">
+            <caption>Patient growth data for the last 6 months</caption>
+            <thead>
+              <tr>
+                <th scope="col">Month</th>
+                <th scope="col">New Patients</th>
+              </tr>
+            </thead>
+            <tbody>
+              {analytics.patientGrowth.map((g) => (
+                <tr key={g.month}>
+                  <td>{g.month}</td>
+                  <td>{g.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {/* Recent Activity */}

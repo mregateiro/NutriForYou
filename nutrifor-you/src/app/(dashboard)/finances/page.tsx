@@ -103,15 +103,19 @@ export default function FinancesPage() {
         </div>
       </div>
 
-      <div className="flex gap-1 border rounded-md overflow-hidden mb-6 w-fit">
+      <div className="flex gap-1 border rounded-md overflow-hidden mb-6 w-fit" role="tablist" aria-label="Finance view">
         <button
           onClick={() => setTab('overview')}
+          role="tab"
+          aria-selected={tab === 'overview'}
           className={`px-4 py-2 text-sm font-medium ${tab === 'overview' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}`}
         >
           Overview
         </button>
         <button
           onClick={() => setTab('payments')}
+          role="tab"
+          aria-selected={tab === 'payments'}
           className={`px-4 py-2 text-sm font-medium ${tab === 'payments' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}`}
         >
           All Payments
@@ -225,23 +229,25 @@ export default function FinancesPage() {
           )}
 
           {totalPages > 1 && (
-            <div className="flex justify-center space-x-2 mt-4">
+            <nav className="flex justify-center space-x-2 mt-4" aria-label="Payments pagination">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-1 border rounded text-sm disabled:opacity-50"
+                aria-label="Previous page"
+                className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
-              <span className="px-3 py-1 text-sm text-gray-500">Page {page} of {totalPages}</span>
+              <span className="px-3 py-1 text-sm text-gray-500" aria-live="polite" aria-atomic="true">Page {page} of {totalPages}</span>
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-1 border rounded text-sm disabled:opacity-50"
+                aria-label="Next page"
+                className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
-            </div>
+            </nav>
           )}
         </>
       )}

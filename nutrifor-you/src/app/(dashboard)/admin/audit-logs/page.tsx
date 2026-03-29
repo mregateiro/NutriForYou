@@ -122,11 +122,11 @@ export default function AuditLogsPage() {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex justify-center space-x-2 mt-4">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1 border rounded text-sm disabled:opacity-50">Previous</button>
-              <span className="px-3 py-1 text-sm text-gray-500">Page {page} of {totalPages}</span>
-              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-3 py-1 border rounded text-sm disabled:opacity-50">Next</button>
-            </div>
+            <nav className="flex justify-center space-x-2 mt-4" aria-label="Audit logs pagination">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} aria-label="Previous page" className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+              <span className="px-3 py-1 text-sm text-gray-500" aria-live="polite" aria-atomic="true">Page {page} of {totalPages}</span>
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} aria-label="Next page" className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+            </nav>
           )}
         </>
       )}
