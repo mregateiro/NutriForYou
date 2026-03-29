@@ -110,13 +110,13 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <MetricCard
           title="Total Revenue"
-          value={`R$ ${analytics.revenue.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-          subtitle={`R$ ${analytics.revenue.thisMonth.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} this month`}
+          value={`€${analytics.revenue.total.toLocaleString('pt-PT', { minimumFractionDigits: 2 })}`}
+          subtitle={`€${analytics.revenue.thisMonth.toLocaleString('pt-PT', { minimumFractionDigits: 2 })} this month`}
           color="green"
         />
         <MetricCard
           title="Pending Payments"
-          value={`R$ ${analytics.revenue.pending.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+          value={`€${analytics.revenue.pending.toLocaleString('pt-PT', { minimumFractionDigits: 2 })}`}
           color="yellow"
         />
         <MetricCard

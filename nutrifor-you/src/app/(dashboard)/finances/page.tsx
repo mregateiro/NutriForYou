@@ -71,8 +71,8 @@ export default function FinancesPage() {
     if (tab === 'payments') fetchPayments()
   }, [tab, fetchPayments])
 
-  const formatCurrency = (amount: number, currency = 'BRL') =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency }).format(amount)
+  const formatCurrency = (amount: number, currency = 'EUR') =>
+    new Intl.NumberFormat('pt-PT', { style: 'currency', currency }).format(amount)
 
   if (loading) return <div className="text-center py-12 text-gray-500">Loading finances...</div>
 
