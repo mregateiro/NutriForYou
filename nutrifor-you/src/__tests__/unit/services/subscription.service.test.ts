@@ -58,11 +58,10 @@ describe('getSubscription', () => {
 describe('changeSubscription', () => {
   it('sets period end 1 year ahead for ANNUAL billing cycle', async () => {
     const existing = buildSubscription()
-    const updated = buildSubscription({ tier: 'BUSINESS', status: 'ACTIVE' })
+    const updated = buildSubscription({ tier: 'BUSINESS', status: 'PAST_DUE' })
 
     prisma.subscription.findUnique.mockResolvedValue(existing)
     prisma.subscription.update.mockResolvedValue(updated)
-    prisma.user.update.mockResolvedValue({})
 
     const { changeSubscription } = await import('@/services/subscription.service')
     const result = await changeSubscription('test-user-id', {
@@ -74,7 +73,7 @@ describe('changeSubscription', () => {
       where: { id: existing.id },
       data: expect.objectContaining({
         tier: 'BUSINESS',
-        status: 'ACTIVE',
+        status: 'PAST_DUE',
         trialEndsAt: null,
       }),
     })
@@ -94,11 +93,10 @@ describe('changeSubscription', () => {
 
   it('sets period end 1 month ahead for MONTHLY billing cycle', async () => {
     const existing = buildSubscription()
-    const updated = buildSubscription({ tier: 'LITE', status: 'ACTIVE' })
+    const updated = buildSubscription({ tier: 'LITE', status: 'PAST_DUE' })
 
     prisma.subscription.findUnique.mockResolvedValue(existing)
     prisma.subscription.update.mockResolvedValue(updated)
-    prisma.user.update.mockResolvedValue({})
 
     const { changeSubscription } = await import('@/services/subscription.service')
     await changeSubscription('test-user-id', {
@@ -117,13 +115,12 @@ describe('changeSubscription', () => {
     expect(diffDays).toBeLessThanOrEqual(31)
   })
 
-  it('updates user subscription tier', async () => {
+  it('does not update user tier until payment is confirmed', async () => {
     const existing = buildSubscription()
-    const updated = buildSubscription({ tier: 'PREMIUM', status: 'ACTIVE' })
+    const updated = buildSubscription({ tier: 'PREMIUM', status: 'PAST_DUE' })
 
     prisma.subscription.findUnique.mockResolvedValue(existing)
     prisma.subscription.update.mockResolvedValue(updated)
-    prisma.user.update.mockResolvedValue({})
 
     const { changeSubscription } = await import('@/services/subscription.service')
     await changeSubscription('test-user-id', {
@@ -131,19 +128,15 @@ describe('changeSubscription', () => {
       billingCycle: 'MONTHLY',
     })
 
-    expect(prisma.user.update).toHaveBeenCalledWith({
-      where: { id: 'test-user-id' },
-      data: { subscriptionTier: 'PREMIUM' },
-    })
+    expect(prisma.user.update).not.toHaveBeenCalled()
   })
 
-  it('creates an audit log entry', async () => {
+  it('creates an audit log entry with awaitingPayment flag', async () => {
     const existing = buildSubscription()
-    const updated = buildSubscription({ tier: 'LITE', status: 'ACTIVE' })
+    const updated = buildSubscription({ tier: 'LITE', status: 'PAST_DUE' })
 
     prisma.subscription.findUnique.mockResolvedValue(existing)
     prisma.subscription.update.mockResolvedValue(updated)
-    prisma.user.update.mockResolvedValue({})
 
     const { changeSubscription } = await import('@/services/subscription.service')
     await changeSubscription('test-user-id', {
@@ -157,7 +150,81 @@ describe('changeSubscription', () => {
       action: 'UPDATE',
       entity: 'Subscription',
       entityId: updated.id,
-      details: { newTier: 'LITE', billingCycle: 'MONTHLY' },
+      details: { newTier: 'LITE', billingCycle: 'MONTHLY', awaitingPayment: true },
+    })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// confirmSubscriptionPayment
+// ---------------------------------------------------------------------------
+describe('confirmSubscriptionPayment', () => {
+  it('activates subscription and updates user tier on payment confirmation', async () => {
+    const existing = buildSubscription({
+      tier: 'PREMIUM',
+      status: 'PAST_DUE',
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(Date.now() + 30 * 86400000),
+    })
+    const activated = buildSubscription({ tier: 'PREMIUM', status: 'ACTIVE' })
+
+    prisma.subscription.findUnique.mockResolvedValue(existing)
+    prisma.subscription.update.mockResolvedValue(activated)
+    prisma.user.update.mockResolvedValue({})
+
+    const { confirmSubscriptionPayment } = await import('@/services/subscription.service')
+    const result = await confirmSubscriptionPayment('test-user-id', 'credit_card')
+
+    expect(prisma.subscription.update).toHaveBeenCalledWith({
+      where: { id: existing.id },
+      data: { status: 'ACTIVE' },
+    })
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'test-user-id' },
+      data: { subscriptionTier: 'PREMIUM' },
+    })
+
+    expect(result).toEqual(activated)
+  })
+
+  it('throws if subscription is not in PAST_DUE status', async () => {
+    const existing = buildSubscription({ status: 'ACTIVE' })
+    prisma.subscription.findUnique.mockResolvedValue(existing)
+
+    const { confirmSubscriptionPayment } = await import('@/services/subscription.service')
+    await expect(confirmSubscriptionPayment('test-user-id', 'credit_card'))
+      .rejects.toThrow('No pending subscription payment to confirm')
+  })
+
+  it('creates an audit log with payment details', async () => {
+    const existing = buildSubscription({
+      tier: 'BUSINESS',
+      status: 'PAST_DUE',
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(Date.now() + 365 * 86400000),
+    })
+    const activated = buildSubscription({ tier: 'BUSINESS', status: 'ACTIVE' })
+
+    prisma.subscription.findUnique.mockResolvedValue(existing)
+    prisma.subscription.update.mockResolvedValue(activated)
+    prisma.user.update.mockResolvedValue({})
+
+    const { confirmSubscriptionPayment } = await import('@/services/subscription.service')
+    await confirmSubscriptionPayment('test-user-id', 'mbway')
+
+    const { createAuditLog } = await import('@/services/audit.service')
+    expect(createAuditLog).toHaveBeenCalledWith({
+      userId: 'test-user-id',
+      action: 'UPDATE',
+      entity: 'Subscription',
+      entityId: activated.id,
+      details: expect.objectContaining({
+        action: 'payment_confirmed',
+        tier: 'BUSINESS',
+        billingCycle: 'ANNUAL',
+        paymentMethod: 'mbway',
+      }),
     })
   })
 })
