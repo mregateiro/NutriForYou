@@ -50,14 +50,12 @@ describe('GET /api/integrations', () => {
     expect(data.error).toBe('Unauthorized')
   })
 
-  it('returns integrations list', async () => {
   it('returns integrations list including DISCONNECTED records', async () => {
     const { getServerSession } = await import('next-auth')
     const session = createMockSession()
     vi.mocked(getServerSession).mockResolvedValue(session)
 
     const mockIntegrations = [
-      { id: 'int-1', provider: 'STRIPE', status: 'CONNECTED' },
       { id: 'int-1', provider: 'STRIPE', status: 'CONNECTED', lastSyncAt: null },
       { id: 'int-2', provider: 'WHATSAPP', status: 'DISCONNECTED', lastSyncAt: null },
     ]
@@ -99,7 +97,6 @@ describe('POST /api/integrations', () => {
     vi.mocked(getServerSession).mockResolvedValue(null)
 
     const { POST } = await import('@/app/api/integrations/route')
-    const response = await POST(buildPostRequest({}) as never)
     const response = await POST(buildPostRequest({ provider: 'STRIPE' }) as never)
 
     expect(response.status).toBe(401)
@@ -119,7 +116,6 @@ describe('POST /api/integrations', () => {
     expect(data.error).toBeDefined()
   })
 
-  it('returns 400 when config is empty for provider requiring credentials', async () => {
   it('returns 201 on successful connection', async () => {
     const { getServerSession } = await import('next-auth')
     const session = createMockSession()
@@ -180,12 +176,6 @@ describe('POST /api/integrations', () => {
 
     expect(response.status).toBe(400)
     expect(data.error).toBeDefined()
-  })
-
-  it('returns 201 on successful Stripe connection with valid config', async () => {
-    const response = await POST(buildPostRequest({ provider: 'INVALID_PROVIDER' }) as never)
-
-    expect(response.status).toBe(500)
   })
 
   it('returns 500 when service throws', async () => {
@@ -290,6 +280,16 @@ describe('DELETE /api/integrations/[id]', () => {
     const { POST } = await import('@/app/api/integrations/route')
     const response = await POST(
       buildPostRequest({ provider: 'STRIPE', config: { apiKey: 'sk_live_abc' } }) as never,
+    )
+
+    expect(response.status).toBe(500)
+  })
+
+  it('disconnects an integration successfully', async () => {
+    const { getServerSession } = await import('next-auth')
+    const session = createMockSession()
+    vi.mocked(getServerSession).mockResolvedValue(session)
+
     const { disconnectIntegration } = await import('@/services/integration.service')
     vi.mocked(disconnectIntegration).mockResolvedValue(undefined)
 
