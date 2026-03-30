@@ -116,7 +116,29 @@ describe('POST /api/integrations', () => {
     expect(data.error).toBeDefined()
   })
 
-  it('returns 400 when config is empty for provider requiring credentials', async () => {
+  it('returns 201 on successful connection', async () => {
+    const { getServerSession } = await import('next-auth')
+    const session = createMockSession()
+    vi.mocked(getServerSession).mockResolvedValue(session)
+
+    const mockIntegration = {
+      id: 'int-new',
+      provider: 'STRIPE',
+      status: 'CONNECTED',
+    }
+    const { connectIntegration } = await import('@/services/integration.service')
+    vi.mocked(connectIntegration).mockResolvedValue(mockIntegration as never)
+
+    const { POST } = await import('@/app/api/integrations/route')
+    const response = await POST(buildPostRequest({ provider: 'STRIPE' }) as never)
+    const data = await response.json()
+
+    expect(response.status).toBe(201)
+    expect(data.data).toEqual(mockIntegration)
+    expect(data.data.status).toBe('CONNECTED')
+  })
+
+  it('returns 500 on invalid provider', async () => {
     const { getServerSession } = await import('next-auth')
     vi.mocked(getServerSession).mockResolvedValue(createMockSession())
 
@@ -156,7 +178,38 @@ describe('POST /api/integrations', () => {
     expect(data.error).toBeDefined()
   })
 
-  it('returns 201 on successful Stripe connection with valid config', async () => {
+  it('returns 500 when service throws', async () => {
+    const { getServerSession } = await import('next-auth')
+    vi.mocked(getServerSession).mockResolvedValue(createMockSession())
+
+    const { connectIntegration } = await import('@/services/integration.service')
+    vi.mocked(connectIntegration).mockRejectedValue(new Error('Connection failed'))
+
+    const { POST } = await import('@/app/api/integrations/route')
+    const response = await POST(buildPostRequest({ provider: 'STRIPE' }) as never)
+
+    expect(response.status).toBe(500)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// DELETE /api/integrations/[id]
+// ---------------------------------------------------------------------------
+describe('DELETE /api/integrations/[id]', () => {
+  it('returns 401 without session', async () => {
+    const { getServerSession } = await import('next-auth')
+    vi.mocked(getServerSession).mockResolvedValue(null)
+
+    const { DELETE } = await import('@/app/api/integrations/[id]/route')
+    const response = await DELETE(
+      buildDeleteRequest('int-1') as never,
+      { params: Promise.resolve({ id: 'int-1' }) },
+    )
+
+    expect(response.status).toBe(401)
+  })
+
+  it('returns 200 and sets status to DISCONNECTED', async () => {
     const { getServerSession } = await import('next-auth')
     const session = createMockSession()
     vi.mocked(getServerSession).mockResolvedValue(session)
@@ -231,26 +284,8 @@ describe('POST /api/integrations', () => {
 
     expect(response.status).toBe(500)
   })
-})
 
-// ---------------------------------------------------------------------------
-// DELETE /api/integrations/[id]
-// ---------------------------------------------------------------------------
-describe('DELETE /api/integrations/[id]', () => {
-  it('returns 401 without session', async () => {
-    const { getServerSession } = await import('next-auth')
-    vi.mocked(getServerSession).mockResolvedValue(null)
-
-    const { DELETE } = await import('@/app/api/integrations/[id]/route')
-    const response = await DELETE(
-      buildDeleteRequest('int-1') as never,
-      { params: Promise.resolve({ id: 'int-1' }) },
-    )
-
-    expect(response.status).toBe(401)
-  })
-
-  it('returns 200 and sets status to DISCONNECTED', async () => {
+  it('disconnects an integration successfully', async () => {
     const { getServerSession } = await import('next-auth')
     const session = createMockSession()
     vi.mocked(getServerSession).mockResolvedValue(session)
