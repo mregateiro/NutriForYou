@@ -130,7 +130,7 @@ describe('POST /api/integrations', () => {
     vi.mocked(connectIntegration).mockResolvedValue(mockIntegration as never)
 
     const { POST } = await import('@/app/api/integrations/route')
-    const response = await POST(buildPostRequest({ provider: 'STRIPE' }) as never)
+    const response = await POST(buildPostRequest({ provider: 'STRIPE', config: { apiKey: 'sk_test_123' } }) as never)
     const data = await response.json()
 
     expect(response.status).toBe(201)
@@ -186,7 +186,7 @@ describe('POST /api/integrations', () => {
     vi.mocked(connectIntegration).mockRejectedValue(new Error('Connection failed'))
 
     const { POST } = await import('@/app/api/integrations/route')
-    const response = await POST(buildPostRequest({ provider: 'STRIPE' }) as never)
+    const response = await POST(buildPostRequest({ provider: 'STRIPE', config: { apiKey: 'sk_test_123' } }) as never)
 
     expect(response.status).toBe(500)
   })
