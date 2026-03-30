@@ -290,3 +290,323 @@ export function buildAvailabilityRule(overrides: Record<string, unknown> = {}) {
     ...overrides,
   }
 }
+
+export function buildBlogPost(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    title: `Blog Post ${id}`,
+    slug: `blog-post-${id}`,
+    content: 'Blog post content here',
+    excerpt: 'A short excerpt',
+    category: 'NUTRITION',
+    status: 'DRAFT' as const,
+    coverImageUrl: null,
+    viewCount: 0,
+    publishedAt: null,
+    authorId: 'test-nutritionist-id',
+    author: { id: 'test-nutritionist-id', name: 'Test User' },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildLandingPage(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    title: `Landing Page ${id}`,
+    slug: `landing-page-${id}`,
+    sections: [{ type: 'hero', title: 'Welcome' }],
+    isPublished: false,
+    authorId: 'test-nutritionist-id',
+    author: { id: 'test-nutritionist-id', name: 'Test User' },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildChatConversation(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    title: null,
+    isGroup: false,
+    lastMessageAt: null,
+    participants: [],
+    messages: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildChatParticipant(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    conversationId: 'test-conversation-id',
+    userId: 'test-user-id',
+    lastReadAt: null,
+    user: { id: 'test-user-id', name: 'Test User', email: 'test@example.com' },
+    createdAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildChatMessage(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    conversationId: 'test-conversation-id',
+    senderId: 'test-user-id',
+    type: 'TEXT' as const,
+    content: 'Hello, world!',
+    fileUrl: null,
+    isEdited: false,
+    isDeleted: false,
+    sender: { id: 'test-user-id', name: 'Test User', email: 'test@example.com' },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildConsent(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    userId: 'test-user-id',
+    purpose: 'DATA_PROCESSING' as const,
+    granted: true,
+    version: '1.0',
+    ipAddress: '127.0.0.1',
+    grantedAt: new Date(),
+    revokedAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildContentArticle(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    title: `Article ${id}`,
+    slug: `article-${id}`,
+    content: 'Article content here',
+    excerpt: 'A short excerpt',
+    category: 'NUTRITION',
+    contentType: 'ARTICLE',
+    coverImageUrl: null,
+    isPublished: false,
+    viewCount: 0,
+    authorId: 'test-nutritionist-id',
+    author: { id: 'test-nutritionist-id', name: 'Test User' },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildStudyReference(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    title: `Study ${id}`,
+    journal: 'Journal of Nutrition',
+    authors: 'Smith J, Doe A',
+    year: 2024,
+    doi: `10.1234/${id}`,
+    url: `https://doi.org/10.1234/${id}`,
+    summary: 'Study summary here',
+    addedById: 'test-nutritionist-id',
+    addedBy: { id: 'test-nutritionist-id', name: 'Test User' },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildCampaign(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    name: `Campaign ${id}`,
+    type: 'EMAIL' as const,
+    subject: 'Campaign Subject',
+    content: 'Campaign content here',
+    status: 'DRAFT' as const,
+    templateId: null,
+    segmentId: null,
+    scheduledAt: null,
+    sentAt: null,
+    authorId: 'test-nutritionist-id',
+    author: { id: 'test-nutritionist-id', name: 'Test User' },
+    template: null,
+    segment: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildEmailTemplate(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    name: `Template ${id}`,
+    subject: 'Template Subject',
+    htmlContent: '<h1>Hello</h1>',
+    textContent: 'Hello',
+    authorId: 'test-nutritionist-id',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildContactSegment(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    name: `Segment ${id}`,
+    filters: { roles: ['NUTRITIONIST'] },
+    count: 10,
+    authorId: 'test-nutritionist-id',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildFeatureFlag(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    key: `feature-${id}`,
+    name: `Feature ${id}`,
+    description: 'A feature flag',
+    isEnabled: true,
+    tiers: [] as string[],
+    metadata: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildNotification(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    userId: 'test-user-id',
+    type: 'SYSTEM' as const,
+    title: `Notification ${id}`,
+    message: 'You have a new notification',
+    data: null,
+    readAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildSupportTicket(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    subject: `Support Ticket ${id}`,
+    description: 'I need help with something',
+    category: 'GENERAL',
+    priority: 'MEDIUM' as const,
+    status: 'OPEN' as const,
+    userId: 'test-user-id',
+    assignedTo: null,
+    resolvedAt: null,
+    closedAt: null,
+    user: { id: 'test-user-id', name: 'Test User', email: 'test@example.com' },
+    assignee: null,
+    replies: [],
+    _count: { replies: 0 },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildTicketReply(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    ticketId: 'test-ticket-id',
+    userId: 'test-user-id',
+    message: 'Reply message here',
+    isStaff: false,
+    user: { id: 'test-user-id', name: 'Test User', email: 'test@example.com' },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildKBArticle(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    title: `KB Article ${id}`,
+    slug: `kb-article-${id}`,
+    content: 'Knowledge base article content',
+    category: 'GETTING_STARTED',
+    isPublished: true,
+    viewCount: 0,
+    authorId: 'test-nutritionist-id',
+    author: { id: 'test-nutritionist-id', name: 'Test User' },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildOrganization(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    name: `Organization ${id}`,
+    slug: `org-${id}`,
+    logoUrl: null,
+    primaryColor: '#007bff',
+    secondaryColor: '#6c757d',
+    website: null,
+    phone: null,
+    address: null,
+    city: null,
+    state: null,
+    country: null,
+    postalCode: null,
+    taxId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  }
+}
+
+export function buildAuditLog(overrides: Record<string, unknown> = {}) {
+  const id = nextId()
+  return {
+    id,
+    userId: 'test-user-id',
+    action: 'CREATE' as const,
+    entity: 'User',
+    entityId: 'test-entity-id',
+    details: null,
+    ipAddress: null,
+    userAgent: null,
+    user: { id: 'test-user-id', email: 'test@example.com', name: 'Test User' },
+    createdAt: new Date(),
+    ...overrides,
+  }
+}

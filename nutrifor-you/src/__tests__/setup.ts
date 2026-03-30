@@ -11,6 +11,7 @@ vi.mock('@/lib/prisma', () => ({
       update: vi.fn(),
       delete: vi.fn(),
       count: vi.fn(),
+      groupBy: vi.fn(),
     },
     patient: {
       findUnique: vi.fn(),
@@ -70,6 +71,8 @@ vi.mock('@/lib/prisma', () => ({
       findUnique: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
+      count: vi.fn(),
+      groupBy: vi.fn(),
     },
     payment: {
       findUnique: vi.fn(),
