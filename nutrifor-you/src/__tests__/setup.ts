@@ -111,6 +111,21 @@ vi.mock('@/lib/prisma', () => ({
     auditLog: {
       create: vi.fn(),
     },
+    integration: {
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      upsert: vi.fn(),
+      delete: vi.fn(),
+      count: vi.fn(),
+    },
+    webhookLog: {
+      findMany: vi.fn(),
+      create: vi.fn(),
+      count: vi.fn(),
+    },
     $transaction: vi.fn((fn: (tx: unknown) => unknown) => fn({
       user: { update: vi.fn() },
       subscription: { update: vi.fn() },

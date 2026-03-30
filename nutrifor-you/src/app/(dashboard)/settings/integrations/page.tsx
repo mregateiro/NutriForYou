@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef, type FormEvent } from 'react'
 
 interface IntegrationItem {
   id: string
@@ -8,6 +8,40 @@ interface IntegrationItem {
   status: string
   lastSyncAt: string | null
   createdAt: string
+}
+
+interface ConfigField {
+  name: string
+  label: string
+  type: 'text' | 'password' | 'url'
+  required: boolean
+  placeholder: string
+}
+
+const PROVIDER_FIELDS: Record<string, ConfigField[]> = {
+  GOOGLE_CALENDAR: [
+    { name: 'clientId', label: 'Client ID', type: 'text', required: true, placeholder: 'Your Google OAuth Client ID' },
+    { name: 'clientSecret', label: 'Client Secret', type: 'password', required: true, placeholder: 'Your Google OAuth Client Secret' },
+  ],
+  WHATSAPP: [
+    { name: 'apiToken', label: 'API Token', type: 'password', required: true, placeholder: 'WhatsApp Business API Token' },
+    { name: 'phoneNumberId', label: 'Phone Number ID', type: 'text', required: true, placeholder: 'WhatsApp Phone Number ID' },
+  ],
+  STRIPE: [
+    { name: 'apiKey', label: 'Secret Key', type: 'password', required: true, placeholder: 'sk_live_...' },
+  ],
+  PAGSEGURO: [
+    { name: 'email', label: 'Email', type: 'text', required: true, placeholder: 'your-email@example.com' },
+    { name: 'token', label: 'Token', type: 'password', required: true, placeholder: 'Your PagSeguro token' },
+  ],
+  ZOOM: [
+    { name: 'clientId', label: 'Client ID', type: 'text', required: true, placeholder: 'Your Zoom OAuth Client ID' },
+    { name: 'clientSecret', label: 'Client Secret', type: 'password', required: true, placeholder: 'Your Zoom OAuth Client Secret' },
+  ],
+  WEBHOOK: [
+    { name: 'url', label: 'Webhook URL', type: 'url', required: true, placeholder: 'https://example.com/webhook' },
+    { name: 'secret', label: 'Secret (optional)', type: 'password', required: false, placeholder: 'Signing secret for verification' },
+  ],
 }
 
 const PROVIDERS = [
@@ -29,6 +63,11 @@ const STATUS_COLORS: Record<string, string> = {
 export default function IntegrationsPage() {
   const [integrations, setIntegrations] = useState<IntegrationItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [connectingProvider, setConnectingProvider] = useState<string | null>(null)
+  const [formValues, setFormValues] = useState<Record<string, string>>({})
+  const [formError, setFormError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const dialogRef = useRef<HTMLDialogElement>(null)
 
   const fetchIntegrations = useCallback(async () => {
     try {
@@ -44,16 +83,56 @@ export default function IntegrationsPage() {
 
   useEffect(() => { fetchIntegrations() }, [fetchIntegrations])
 
-  const connect = async (provider: string) => {
+  const openConnectModal = (providerKey: string) => {
+    setConnectingProvider(providerKey)
+    setFormValues({})
+    setFormError(null)
+    setSubmitting(false)
+    dialogRef.current?.showModal()
+  }
+
+  const closeModal = () => {
+    dialogRef.current?.close()
+    setConnectingProvider(null)
+    setFormValues({})
+    setFormError(null)
+    setSubmitting(false)
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!connectingProvider) return
+
+    const fields = PROVIDER_FIELDS[connectingProvider] || []
+    for (const field of fields) {
+      if (field.required && !formValues[field.name]?.trim()) {
+        setFormError(`${field.label} is required.`)
+        return
+      }
+    }
+
+    setFormError(null)
+    setSubmitting(true)
+
     try {
-      await fetch('/api/integrations', {
+      const res = await fetch('/api/integrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider }),
+        body: JSON.stringify({ provider: connectingProvider, config: formValues }),
       })
+
+      if (!res.ok) {
+        const result = await res.json()
+        setFormError(result.error || 'Failed to connect. Please try again.')
+        setSubmitting(false)
+        return
+      }
+
+      closeModal()
       fetchIntegrations()
-    } catch (error) {
-      console.error('Failed to connect:', error)
+    } catch {
+      setFormError('Network error. Please try again.')
+      setSubmitting(false)
     }
   }
 
@@ -68,6 +147,9 @@ export default function IntegrationsPage() {
   }
 
   const getConnected = (provider: string) => integrations.find((i) => i.provider === provider)
+
+  const activeProvider = PROVIDERS.find((p) => p.key === connectingProvider)
+  const activeFields = connectingProvider ? PROVIDER_FIELDS[connectingProvider] || [] : []
 
   if (loading) return <div className="text-center py-12 text-gray-500">Loading...</div>
 
@@ -109,7 +191,7 @@ export default function IntegrationsPage() {
                 </div>
               ) : (
                 <button
-                  onClick={() => connect(p.key)}
+                  onClick={() => openConnectModal(p.key)}
                   className="w-full bg-indigo-600 text-white px-3 py-1.5 rounded-md hover:bg-indigo-700 text-sm font-medium"
                 >
                   Connect
@@ -119,6 +201,80 @@ export default function IntegrationsPage() {
           )
         })}
       </div>
+
+      {/* Configuration Modal */}
+      <dialog
+        ref={dialogRef}
+        className="rounded-lg shadow-xl p-0 w-full max-w-md backdrop:bg-black/50"
+        onClose={closeModal}
+        aria-labelledby="connect-modal-title"
+      >
+        {activeProvider && (
+          <form onSubmit={handleSubmit} className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 id="connect-modal-title" className="text-lg font-semibold text-gray-900">
+                Connect {activeProvider.name}
+              </h2>
+              <button
+                type="button"
+                onClick={closeModal}
+                className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-500 mb-4">
+              Enter your credentials to connect {activeProvider.name}.
+            </p>
+
+            {formError && (
+              <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-700">
+                {formError}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {activeFields.map((field) => (
+                <div key={field.name}>
+                  <label htmlFor={`field-${field.name}`} className="block text-sm font-medium text-gray-700 mb-1">
+                    {field.label}
+                    {field.required && <span className="text-red-500 ml-0.5" aria-hidden="true">*</span>}
+                  </label>
+                  <input
+                    id={`field-${field.name}`}
+                    type={field.type}
+                    required={field.required}
+                    aria-required={field.required}
+                    placeholder={field.placeholder}
+                    value={formValues[field.name] || ''}
+                    onChange={(e) => setFormValues((prev) => ({ ...prev, [field.name]: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-4 py-2 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                {submitting ? 'Connecting...' : 'Connect'}
+              </button>
+            </div>
+          </form>
+        )}
+      </dialog>
     </div>
   )
 }

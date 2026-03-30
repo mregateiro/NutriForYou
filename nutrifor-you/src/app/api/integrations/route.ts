@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
+import { ZodError } from 'zod'
 import { authOptions } from '@/lib/auth'
 import { listIntegrations, connectIntegration } from '@/services/integration.service'
 import { connectIntegrationSchema } from '@/validators/integration.schema'
@@ -32,6 +33,13 @@ export async function POST(req: NextRequest) {
     const integration = await connectIntegration(session.user.id, input)
     return NextResponse.json({ data: integration }, { status: 201 })
   } catch (error) {
+    if (error instanceof ZodError) {
+      const firstIssue = error.issues[0]
+      return NextResponse.json(
+        { error: firstIssue?.message || 'Invalid configuration' },
+        { status: 400 }
+      )
+    }
     logger.error({ error }, 'Failed to connect integration')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
