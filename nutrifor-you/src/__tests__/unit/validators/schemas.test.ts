@@ -25,6 +25,11 @@ import {
   changeSubscriptionSchema,
   cancelSubscriptionSchema,
 } from '@/validators/subscription.schema'
+import {
+  connectIntegrationSchema,
+  updateIntegrationSchema,
+  webhookConfigSchema,
+} from '@/validators/integration.schema'
 
 // ---------------------------------------------------------------------------
 // Auth Schemas
@@ -836,6 +841,235 @@ describe('Subscription Schemas', () => {
       if (result.success) {
         expect(result.data.immediate).toBe(true)
       }
+    })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Integration Schemas
+// ---------------------------------------------------------------------------
+describe('Integration Schemas', () => {
+  describe('connectIntegrationSchema', () => {
+    it('rejects when config is missing', () => {
+      const result = connectIntegrationSchema.safeParse({ provider: 'STRIPE' })
+      expect(result.success).toBe(false)
+    })
+
+    it('rejects when config is empty for providers that require fields', () => {
+      const result = connectIntegrationSchema.safeParse({ provider: 'STRIPE', config: {} })
+      expect(result.success).toBe(false)
+    })
+
+    it('rejects invalid provider', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'INVALID',
+        config: { apiKey: 'key123' },
+      })
+      expect(result.success).toBe(false)
+    })
+
+    // GOOGLE_CALENDAR
+    it('accepts valid Google Calendar config', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'GOOGLE_CALENDAR',
+        config: { clientId: 'id-123', clientSecret: 'secret-456' },
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects Google Calendar config without clientSecret', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'GOOGLE_CALENDAR',
+        config: { clientId: 'id-123' },
+      })
+      expect(result.success).toBe(false)
+    })
+
+    it('rejects Google Calendar config with empty clientId', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'GOOGLE_CALENDAR',
+        config: { clientId: '', clientSecret: 'secret-456' },
+      })
+      expect(result.success).toBe(false)
+    })
+
+    // WHATSAPP
+    it('accepts valid WhatsApp config', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'WHATSAPP',
+        config: { apiToken: 'token-123', phoneNumberId: 'phone-456' },
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects WhatsApp config without phoneNumberId', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'WHATSAPP',
+        config: { apiToken: 'token-123' },
+      })
+      expect(result.success).toBe(false)
+    })
+
+    // STRIPE
+    it('accepts valid Stripe config', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'STRIPE',
+        config: { apiKey: 'sk_live_abc123' },
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects Stripe config with empty apiKey', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'STRIPE',
+        config: { apiKey: '' },
+      })
+      expect(result.success).toBe(false)
+    })
+
+    // PAGSEGURO
+    it('accepts valid PagSeguro config', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'PAGSEGURO',
+        config: { email: 'test@example.com', token: 'tok-123' },
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects PagSeguro config without token', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'PAGSEGURO',
+        config: { email: 'test@example.com' },
+      })
+      expect(result.success).toBe(false)
+    })
+
+    // ZOOM
+    it('accepts valid Zoom config', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'ZOOM',
+        config: { clientId: 'zoom-id', clientSecret: 'zoom-secret' },
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects Zoom config without clientId', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'ZOOM',
+        config: { clientSecret: 'zoom-secret' },
+      })
+      expect(result.success).toBe(false)
+    })
+
+    // WEBHOOK
+    it('accepts valid Webhook config with url only', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'WEBHOOK',
+        config: { url: 'https://example.com/webhook' },
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('accepts valid Webhook config with url and secret', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'WEBHOOK',
+        config: { url: 'https://example.com/webhook', secret: 'my-secret' },
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects Webhook config with invalid url', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'WEBHOOK',
+        config: { url: 'not-a-url' },
+      })
+      expect(result.success).toBe(false)
+    })
+
+    it('rejects Webhook config without url', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'WEBHOOK',
+        config: {},
+      })
+      expect(result.success).toBe(false)
+    })
+
+    it('includes config path prefix in error paths', () => {
+      const result = connectIntegrationSchema.safeParse({
+        provider: 'STRIPE',
+        config: {},
+      })
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        const paths = result.error.errors.map((e) => e.path.join('.'))
+        expect(paths.some((p) => p.startsWith('config'))).toBe(true)
+      }
+    })
+  })
+
+  describe('updateIntegrationSchema', () => {
+    it('accepts empty object', () => {
+      const result = updateIntegrationSchema.safeParse({})
+      expect(result.success).toBe(true)
+    })
+
+    it('accepts valid status', () => {
+      const result = updateIntegrationSchema.safeParse({ status: 'CONNECTED' })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects invalid status', () => {
+      const result = updateIntegrationSchema.safeParse({ status: 'INVALID' })
+      expect(result.success).toBe(false)
+    })
+
+    it('accepts config object', () => {
+      const result = updateIntegrationSchema.safeParse({ config: { key: 'value' } })
+      expect(result.success).toBe(true)
+    })
+  })
+
+  describe('webhookConfigSchema', () => {
+    it('accepts valid webhook config', () => {
+      const result = webhookConfigSchema.safeParse({
+        url: 'https://example.com/hook',
+        events: ['patient.created'],
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects invalid url', () => {
+      const result = webhookConfigSchema.safeParse({
+        url: 'not-url',
+        events: ['patient.created'],
+      })
+      expect(result.success).toBe(false)
+    })
+
+    it('rejects empty events array', () => {
+      const result = webhookConfigSchema.safeParse({
+        url: 'https://example.com/hook',
+        events: [],
+      })
+      expect(result.success).toBe(false)
+    })
+
+    it('accepts optional secret with min length 8', () => {
+      const result = webhookConfigSchema.safeParse({
+        url: 'https://example.com/hook',
+        events: ['patient.created'],
+        secret: 'longsecret',
+      })
+      expect(result.success).toBe(true)
+    })
+
+    it('rejects secret shorter than 8 characters', () => {
+      const result = webhookConfigSchema.safeParse({
+        url: 'https://example.com/hook',
+        events: ['patient.created'],
+        secret: 'short',
+      })
+      expect(result.success).toBe(false)
     })
   })
 })
