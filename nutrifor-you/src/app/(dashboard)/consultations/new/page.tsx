@@ -121,25 +121,14 @@ function NewConsultationForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="patientId" className="block text-sm font-medium text-gray-700">Patient *</label>
+            <label htmlFor="patientId" className="block text-sm font-medium text-gray-700">Patient <span aria-hidden="true">*</span></label>
             <PatientSearch
               id="patientId"
-            <label htmlFor="patientSelect" className="block text-sm font-medium text-gray-700">Patient <span aria-hidden="true">*</span></label>
-            <select
-              id="patientSelect"
               value={formData.patientId}
               onChange={(patientId) => setFormData(prev => ({ ...prev, patientId }))}
               required
               initialPatient={preselectedPatient}
             />
-              aria-required="true"
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            >
-              <option value="">Select patient...</option>
-              {patients.map(p => (
-                <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
-              ))}
-            </select>
           </div>
           <div>
             <label htmlFor="templateSelect" className="block text-sm font-medium text-gray-700">Template</label>
