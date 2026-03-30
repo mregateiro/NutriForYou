@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import PatientSearch from '@/components/patient-search'
 
 interface PatientOption {
   id: string
@@ -21,7 +22,7 @@ function NewConsultationForm() {
   const searchParams = useSearchParams()
   const preselectedPatientId = searchParams.get('patientId')
 
-  const [patients, setPatients] = useState<PatientOption[]>([])
+  const [preselectedPatient, setPreselectedPatient] = useState<PatientOption | null>(null)
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -41,15 +42,27 @@ function NewConsultationForm() {
   })
 
   useEffect(() => {
-    // Load patients and templates
-    Promise.all([
-      fetch('/api/patients?perPage=100').then(r => r.json()),
-      fetch('/api/consultations/templates').then(r => r.json()),
-    ]).then(([patientsRes, templatesRes]) => {
-      setPatients(patientsRes.data || [])
-      setTemplates(templatesRes.data || [])
-    })
-  }, [])
+    // Load templates
+    fetch('/api/consultations/templates')
+      .then(r => r.json())
+      .then(res => setTemplates(res.data || []))
+
+    // If there's a preselected patient, fetch their info
+    if (preselectedPatientId) {
+      fetch(`/api/patients/${preselectedPatientId}`)
+        .then(r => r.json())
+        .then(res => {
+          if (res.data) {
+            setPreselectedPatient({
+              id: res.data.id,
+              firstName: res.data.firstName,
+              lastName: res.data.lastName,
+            })
+          }
+        })
+        .catch(() => {})
+    }
+  }, [preselectedPatientId])
 
   const applyTemplate = (templateId: string) => {
     const template = templates.find(t => t.id === templateId)
@@ -108,18 +121,14 @@ function NewConsultationForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Patient *</label>
-            <select
+            <label htmlFor="patientId" className="block text-sm font-medium text-gray-700">Patient *</label>
+            <PatientSearch
+              id="patientId"
               value={formData.patientId}
-              onChange={(e) => setFormData(prev => ({ ...prev, patientId: e.target.value }))}
+              onChange={(patientId) => setFormData(prev => ({ ...prev, patientId }))}
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            >
-              <option value="">Select patient...</option>
-              {patients.map(p => (
-                <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
-              ))}
-            </select>
+              initialPatient={preselectedPatient}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Template</label>

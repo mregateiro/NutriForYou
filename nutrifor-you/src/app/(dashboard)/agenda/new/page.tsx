@@ -1,17 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-
-interface Patient {
-  id: string
-  firstName: string
-  lastName: string
-}
+import PatientSearch from '@/components/patient-search'
 
 export default function NewAppointmentPage() {
   const router = useRouter()
-  const [patients, setPatients] = useState<Patient[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -26,13 +20,6 @@ export default function NewAppointmentPage() {
     videoLink: '',
     notes: '',
   })
-
-  useEffect(() => {
-    fetch('/api/patients?perPage=100')
-      .then(res => res.json())
-      .then(result => setPatients(result.data || []))
-      .catch(console.error)
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -79,18 +66,12 @@ export default function NewAppointmentPage() {
       <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-4">
         <div>
           <label htmlFor="patientId" className="block text-sm font-medium text-gray-700">Patient *</label>
-          <select
+          <PatientSearch
             id="patientId"
             value={form.patientId}
-            onChange={(e) => setForm({ ...form, patientId: e.target.value })}
+            onChange={(patientId) => setForm({ ...form, patientId })}
             required
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-          >
-            <option value="">Select a patient</option>
-            {patients.map(p => (
-              <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>
-            ))}
-          </select>
+          />
         </div>
 
         <div>
