@@ -13,12 +13,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Ensure form controls always have good contrast on white backgrounds */
+/* Ensure form controls always have good contrast */
 input,
 textarea,
 select {
   color: #111827; /* gray-900 */
-  background-color: #ffffff;
 }
 
 input::placeholder,
