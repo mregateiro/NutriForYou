@@ -67,7 +67,7 @@ export default function IntegrationsPage() {
     }
   }
 
-  const getConnected = (provider: string) => integrations.find((i) => i.provider === provider)
+  const getConnected = (provider: string) => integrations.find((i) => i.provider === provider && i.status === 'CONNECTED')
 
   if (loading) return <div className="text-center py-12 text-gray-500">Loading...</div>
 
