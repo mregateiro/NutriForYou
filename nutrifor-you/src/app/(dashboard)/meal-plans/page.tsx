@@ -77,7 +77,7 @@ export default function MealPlansPage() {
                     : mp.status === 'ARCHIVED' ? 'bg-gray-100 text-gray-700'
                     : 'bg-yellow-100 text-yellow-700'
                   }`}>
-                    {mp.status}
+                    {mp.status === 'ACTIVE' ? '✓ ' : mp.status === 'ARCHIVED' ? '▪ ' : '● '}{mp.status}
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">
@@ -96,11 +96,11 @@ export default function MealPlansPage() {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex justify-center space-x-2 mt-6">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1 border rounded text-sm disabled:opacity-50">Previous</button>
-              <span className="px-3 py-1 text-sm text-gray-500">Page {page} of {totalPages}</span>
-              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-3 py-1 border rounded text-sm disabled:opacity-50">Next</button>
-            </div>
+            <nav className="flex justify-center space-x-2 mt-6" aria-label="Meal plans pagination">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} aria-label="Previous page" className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">Previous</button>
+              <span className="px-3 py-1 text-sm text-gray-500" aria-live="polite" aria-atomic="true">Page {page} of {totalPages}</span>
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} aria-label="Next page" className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+            </nav>
           )}
         </>
       )}

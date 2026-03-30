@@ -54,13 +54,13 @@ function LoginForm() {
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         {registered && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
-            Account created successfully! Please sign in.
+          <div role="status" aria-live="polite" className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
+            ✓ Account created successfully! Please sign in.
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+          <div role="alert" aria-live="assertive" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
             {error}
           </div>
         )}
@@ -74,6 +74,7 @@ function LoginForm() {
             name="email"
             type="email"
             required
+            aria-required="true"
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
@@ -87,13 +88,14 @@ function LoginForm() {
             name="password"
             type="password"
             required
+            aria-required="true"
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
 
         <div className="flex items-center justify-between">
           <div className="text-sm">
-            <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500 underline">
               Forgot your password?
             </Link>
           </div>
@@ -102,14 +104,14 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Signing in...' : 'Sign in'}
         </button>
 
         <p className="text-center text-sm text-gray-600">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500 underline">
             Create one
           </Link>
         </p>

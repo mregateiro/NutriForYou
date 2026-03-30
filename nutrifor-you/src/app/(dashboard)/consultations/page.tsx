@@ -56,6 +56,7 @@ export default function ConsultationsPage() {
         <select
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
+          aria-label="Filter consultations by status"
           className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
         >
           <option value="">All statuses</option>
@@ -76,12 +77,12 @@ export default function ConsultationsPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Duration</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -103,7 +104,7 @@ export default function ConsultationsPage() {
                           ? 'bg-green-100 text-green-700'
                           : 'bg-yellow-100 text-yellow-700'
                       }`}>
-                        {c.status}
+                        {c.status === 'COMPLETED' ? '✓ ' : '● '}{c.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
@@ -113,7 +114,7 @@ export default function ConsultationsPage() {
                       {new Date(c.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-sm">
-                      <Link href={`/consultations/${c.id}`} className="text-indigo-600 hover:text-indigo-500">
+                      <Link href={`/consultations/${c.id}`} className="text-indigo-600 hover:text-indigo-500 underline" aria-label={`View consultation ${c.title || 'Untitled'}`}>
                         View
                       </Link>
                     </td>
@@ -124,23 +125,25 @@ export default function ConsultationsPage() {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex justify-center space-x-2 mt-4">
+            <nav className="flex justify-center space-x-2 mt-4" aria-label="Consultations pagination">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-1 border rounded text-sm disabled:opacity-50"
+                aria-label="Previous page"
+                className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
-              <span className="px-3 py-1 text-sm text-gray-500">Page {page} of {totalPages}</span>
+              <span className="px-3 py-1 text-sm text-gray-500" aria-live="polite" aria-atomic="true">Page {page} of {totalPages}</span>
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-1 border rounded text-sm disabled:opacity-50"
+                aria-label="Next page"
+                className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
-            </div>
+            </nav>
           )}
         </>
       )}
