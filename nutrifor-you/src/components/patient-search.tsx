@@ -120,6 +120,7 @@ export default function PatientSearch({
       <input
         id={id}
         type="text"
+        role="combobox"
         value={displayValue}
         onChange={(e) => handleInputChange(e.target.value)}
         onFocus={() => {
