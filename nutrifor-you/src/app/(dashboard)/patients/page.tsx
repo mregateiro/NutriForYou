@@ -60,6 +60,7 @@ export default function PatientsPage() {
           placeholder="Search patients by name, email, or phone..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+          aria-label="Search patients by name, email, or phone"
           className="w-full md:w-96 rounded-md border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         />
       </div>
@@ -79,12 +80,12 @@ export default function PatientsPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consultations</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Meal Plans</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consultations</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Meal Plans</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -100,7 +101,7 @@ export default function PatientsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{patient._count.consultations}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{patient._count.mealPlans}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <Link href={`/patients/${patient.id}`} className="text-indigo-600 hover:text-indigo-500 mr-4">
+                      <Link href={`/patients/${patient.id}`} className="text-indigo-600 hover:text-indigo-500 underline mr-4" aria-label={`View patient ${patient.firstName} ${patient.lastName}`}>
                         View
                       </Link>
                     </td>
@@ -111,25 +112,27 @@ export default function PatientsPage() {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex justify-center space-x-2 mt-4">
+            <nav className="flex justify-center space-x-2 mt-4" aria-label="Patients pagination">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-1 border rounded text-sm disabled:opacity-50"
+                aria-label="Previous page"
+                className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Previous
               </button>
-              <span className="px-3 py-1 text-sm text-gray-500">
+              <span className="px-3 py-1 text-sm text-gray-500" aria-live="polite" aria-atomic="true">
                 Page {page} of {totalPages}
               </span>
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-1 border rounded text-sm disabled:opacity-50"
+                aria-label="Next page"
+                className="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
               </button>
-            </div>
+            </nav>
           )}
         </>
       )}

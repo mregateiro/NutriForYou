@@ -88,12 +88,13 @@ export default function MessagesPage() {
               placeholder="Enter user ID to start a conversation"
               value={newChatUserId}
               onChange={(e) => setNewChatUserId(e.target.value)}
+              aria-label="User ID for new conversation"
               className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
             />
             <button
               onClick={handleCreateConversation}
               disabled={creating || !newChatUserId.trim()}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium disabled:opacity-50"
+              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {creating ? 'Creating...' : 'Start Chat'}
             </button>
