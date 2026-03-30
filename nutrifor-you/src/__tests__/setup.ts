@@ -79,6 +79,7 @@ vi.mock('@/lib/prisma', () => ({
       update: vi.fn(),
       delete: vi.fn(),
       count: vi.fn(),
+      aggregate: vi.fn(),
     },
     invoice: {
       findUnique: vi.fn(),
