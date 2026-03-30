@@ -14,10 +14,6 @@ vi.mock('@/services/integration.service', () => ({
   connectIntegration: vi.fn(),
 }))
 
-function buildGetRequest() {
-  return new Request('http://localhost/api/integrations', { method: 'GET' })
-}
-
 function buildPostRequest(body: unknown) {
   return new Request('http://localhost/api/integrations', {
     method: 'POST',

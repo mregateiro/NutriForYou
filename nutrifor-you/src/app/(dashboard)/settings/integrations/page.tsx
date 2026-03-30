@@ -105,9 +105,27 @@ export default function IntegrationsPage() {
 
     const fields = PROVIDER_FIELDS[connectingProvider] || []
     for (const field of fields) {
-      if (field.required && !formValues[field.name]?.trim()) {
+      const value = formValues[field.name]?.trim() ?? ''
+      if (field.required && !value) {
         setFormError(`${field.label} is required.`)
         return
+      }
+      if (field.type === 'url' && value) {
+        try {
+          new URL(value)
+        } catch {
+          setFormError(`${field.label} must be a valid URL.`)
+          return
+        }
+      }
+    }
+
+    // Strip empty optional values so they aren't sent as empty strings
+    const config: Record<string, string> = {}
+    for (const field of fields) {
+      const value = formValues[field.name]?.trim() ?? ''
+      if (value) {
+        config[field.name] = value
       }
     }
 
@@ -118,7 +136,7 @@ export default function IntegrationsPage() {
       const res = await fetch('/api/integrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: connectingProvider, config: formValues }),
+        body: JSON.stringify({ provider: connectingProvider, config }),
       })
 
       if (!res.ok) {
