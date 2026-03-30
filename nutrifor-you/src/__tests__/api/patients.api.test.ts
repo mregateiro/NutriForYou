@@ -86,6 +86,60 @@ describe('GET /api/patients', () => {
     )
   })
 
+  it('returns 500 when perPage exceeds maximum of 100', async () => {
+    const { getServerSession } = await import('next-auth')
+    vi.mocked(getServerSession).mockResolvedValue(createMockSession())
+
+    const { GET } = await import('@/app/api/patients/route')
+    const response = await GET(buildGetRequest({ perPage: '200' }) as never)
+
+    expect(response.status).toBe(500)
+  })
+
+  it('accepts perPage at maximum boundary of 100', async () => {
+    const { getServerSession } = await import('next-auth')
+    const session = createMockSession()
+    vi.mocked(getServerSession).mockResolvedValue(session)
+
+    const mockResult = {
+      data: [{ id: 'p1', firstName: 'Jane', lastName: 'Doe' }],
+      pagination: { page: 1, perPage: 100, total: 1, totalPages: 1 },
+    }
+    const { searchPatients } = await import('@/services/patient.service')
+    vi.mocked(searchPatients).mockResolvedValue(mockResult as never)
+
+    const { GET } = await import('@/app/api/patients/route')
+    const response = await GET(buildGetRequest({ perPage: '100' }) as never)
+
+    expect(response.status).toBe(200)
+    expect(searchPatients).toHaveBeenCalledWith(
+      session.user.id,
+      expect.objectContaining({ perPage: 100 }),
+    )
+  })
+
+  it('passes query and pagination params for search', async () => {
+    const { getServerSession } = await import('next-auth')
+    const session = createMockSession()
+    vi.mocked(getServerSession).mockResolvedValue(session)
+
+    const { searchPatients } = await import('@/services/patient.service')
+    vi.mocked(searchPatients).mockResolvedValue({ data: [], pagination: { page: 1, perPage: 10, total: 0, totalPages: 0 } } as never)
+
+    const { GET } = await import('@/app/api/patients/route')
+    await GET(buildGetRequest({ query: 'maria', perPage: '10', sortBy: 'firstName', sortOrder: 'asc' }) as never)
+
+    expect(searchPatients).toHaveBeenCalledWith(
+      session.user.id,
+      expect.objectContaining({
+        query: 'maria',
+        perPage: 10,
+        sortBy: 'firstName',
+        sortOrder: 'asc',
+      }),
+    )
+  })
+
   it('returns 500 when service throws', async () => {
     const { getServerSession } = await import('next-auth')
     vi.mocked(getServerSession).mockResolvedValue(createMockSession())

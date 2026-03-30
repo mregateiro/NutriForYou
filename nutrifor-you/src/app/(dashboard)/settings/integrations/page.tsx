@@ -164,7 +164,7 @@ export default function IntegrationsPage() {
     }
   }
 
-  const getConnected = (provider: string) => integrations.find((i) => i.provider === provider)
+  const getConnected = (provider: string) => integrations.find((i) => i.provider === provider && i.status === 'CONNECTED')
 
   const activeProvider = PROVIDERS.find((p) => p.key === connectingProvider)
   const activeFields = connectingProvider ? PROVIDER_FIELDS[connectingProvider] || [] : []
