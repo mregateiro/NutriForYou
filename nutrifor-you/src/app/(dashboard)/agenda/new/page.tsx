@@ -28,7 +28,7 @@ export default function NewAppointmentPage() {
   })
 
   useEffect(() => {
-    fetch('/api/patients?perPage=200')
+    fetch('/api/patients?perPage=100')
       .then(res => res.json())
       .then(result => setPatients(result.data || []))
       .catch(console.error)
