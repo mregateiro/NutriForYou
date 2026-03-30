@@ -142,10 +142,10 @@ export default function PatientSearch({
           type="text"
           value={value}
           required
+          readOnly
           tabIndex={-1}
           aria-hidden="true"
           className="sr-only"
-          onChange={() => {}}
         />
       )}
 
