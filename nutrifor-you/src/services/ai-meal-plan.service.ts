@@ -274,14 +274,18 @@ async function callAIWithModel(
   if (!content) throw new Error('Empty response from AI')
 
   const parsed = tryParseJSON(content)
-  return parsed.days || parsed
+  // AI may return { days: [...] } or directly [...]
+  if ('days' in parsed && Array.isArray(parsed.days)) {
+    return parsed.days
+  }
+  return parsed as AIMealPlanDay[]
 }
 
 /**
  * Attempt to parse JSON content, with basic repair for truncated responses.
  * AI models can hit token limits and return truncated JSON.
  */
-function tryParseJSON(content: string): { days?: AIMealPlanDay[] } & AIMealPlanDay[] {
+function tryParseJSON(content: string): { days?: AIMealPlanDay[] } | AIMealPlanDay[] {
   // First try direct parse
   try {
     return JSON.parse(content)
@@ -307,7 +311,8 @@ function tryParseJSON(content: string): { days?: AIMealPlanDay[] } & AIMealPlanD
     const openStack: string[] = []
     for (const ch of repaired) {
       if (ch === '{' || ch === '[') openStack.push(ch)
-      else if (ch === '}' || ch === ']') openStack.pop()
+      else if (ch === '}' && openStack[openStack.length - 1] === '{') openStack.pop()
+      else if (ch === ']' && openStack[openStack.length - 1] === '[') openStack.pop()
     }
 
     // Close in reverse order (innermost first)
@@ -326,9 +331,7 @@ function tryParseJSON(content: string): { days?: AIMealPlanDay[] } & AIMealPlanD
   }
 
   // If repair fails, re-parse to throw the original SyntaxError
-  JSON.parse(content)
-  // Should never reach here, but just in case:
-  throw new Error('Failed to parse AI response as JSON')
+  return JSON.parse(content)
 }
 
 /** Sample food items per meal type for the fallback plan */
