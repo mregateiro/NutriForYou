@@ -14,6 +14,7 @@ beforeEach(() => {
   vi.stubEnv('AI_API_KEY', 'test-api-key')
   vi.stubEnv('AI_BASE_URL', 'https://test-ai.example.com/v1')
   vi.stubEnv('AI_MODEL', 'test-model')
+  vi.stubEnv('AI_FALLBACK_MODELS', '')
 })
 
 // ---------------------------------------------------------------------------
@@ -135,5 +136,149 @@ describe('generateMealPlan', () => {
     await expect(
       generateMealPlan('nutri-1', defaultInput as never),
     ).rejects.toThrow('Patient not found')
+  })
+
+  it('adds OpenRouter-specific headers and provider config when using OpenRouter', async () => {
+    vi.stubEnv('AI_BASE_URL', 'https://openrouter.ai/api/v1')
+    vi.stubEnv('NEXT_PUBLIC_APP_URL', 'https://myapp.example.com')
+
+    const patient = buildPatient({ id: 'patient-1', nutritionistId: 'nutri-1' })
+    const mealPlan = buildMealPlan({ id: 'mp-3', aiGenerated: true })
+
+    prisma.patient.findFirst.mockResolvedValue(patient)
+    prisma.mealPlan.create.mockResolvedValue(mealPlan)
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        choices: [{
+          message: {
+            content: JSON.stringify([{
+              dayOfWeek: 'MONDAY',
+              meals: [{
+                mealType: 'BREAKFAST',
+                name: 'Oatmeal',
+                time: '08:00',
+                foodItems: [{
+                  name: 'Oats', quantity: 100, unit: 'g',
+                  calories: 389, protein: 17, carbs: 66, fat: 7,
+                }],
+              }],
+            }]),
+          },
+        }],
+      }),
+    })
+
+    const { generateMealPlan } = await import('@/services/ai-meal-plan.service')
+    await generateMealPlan('nutri-1', defaultInput as never)
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      'https://openrouter.ai/api/v1/chat/completions',
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          'HTTP-Referer': 'https://myapp.example.com',
+          'X-Title': 'NutriForYou',
+        }),
+      }),
+    )
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+    expect(body.provider).toEqual({
+      allow_fallbacks: true,
+      data_collection: 'allow',
+    })
+  })
+
+  it('retries with fallback models on 404 errors', async () => {
+    vi.stubEnv('AI_FALLBACK_MODELS', 'fallback-model-1,fallback-model-2')
+
+    const patient = buildPatient({ id: 'patient-1', nutritionistId: 'nutri-1' })
+    const mealPlan = buildMealPlan({ id: 'mp-4', aiGenerated: true })
+
+    prisma.patient.findFirst.mockResolvedValue(patient)
+    prisma.mealPlan.create.mockResolvedValue(mealPlan)
+
+    // First call (primary model) returns 404
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      text: async () => '{"error":{"message":"No endpoints available","code":404}}',
+    })
+    // Second call (fallback model) succeeds
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        choices: [{
+          message: {
+            content: JSON.stringify([{
+              dayOfWeek: 'MONDAY',
+              meals: [{
+                mealType: 'BREAKFAST',
+                name: 'Oatmeal',
+                time: '08:00',
+                foodItems: [{
+                  name: 'Oats', quantity: 100, unit: 'g',
+                  calories: 389, protein: 17, carbs: 66, fat: 7,
+                }],
+              }],
+            }]),
+          },
+        }],
+      }),
+    })
+
+    const { generateMealPlan } = await import('@/services/ai-meal-plan.service')
+    const result = await generateMealPlan('nutri-1', defaultInput as never)
+
+    expect(result).toEqual(mealPlan)
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+
+    // Verify the second call used the fallback model
+    const secondCallBody = JSON.parse(mockFetch.mock.calls[1][1].body)
+    expect(secondCallBody.model).toBe('fallback-model-1')
+  })
+
+  it('does not add OpenRouter headers for non-OpenRouter base URLs', async () => {
+    vi.stubEnv('AI_BASE_URL', 'https://api.openai.com/v1')
+
+    const patient = buildPatient({ id: 'patient-1', nutritionistId: 'nutri-1' })
+    const mealPlan = buildMealPlan({ id: 'mp-5', aiGenerated: true })
+
+    prisma.patient.findFirst.mockResolvedValue(patient)
+    prisma.mealPlan.create.mockResolvedValue(mealPlan)
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        choices: [{
+          message: {
+            content: JSON.stringify([{
+              dayOfWeek: 'MONDAY',
+              meals: [{
+                mealType: 'BREAKFAST',
+                name: 'Oatmeal',
+                time: '08:00',
+                foodItems: [{
+                  name: 'Oats', quantity: 100, unit: 'g',
+                  calories: 389, protein: 17, carbs: 66, fat: 7,
+                }],
+              }],
+            }]),
+          },
+        }],
+      }),
+    })
+
+    const { generateMealPlan } = await import('@/services/ai-meal-plan.service')
+    await generateMealPlan('nutri-1', defaultInput as never)
+
+    const headers = mockFetch.mock.calls[0][1].headers
+    expect(headers['HTTP-Referer']).toBeUndefined()
+    expect(headers['X-Title']).toBeUndefined()
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+    expect(body.provider).toBeUndefined()
   })
 })

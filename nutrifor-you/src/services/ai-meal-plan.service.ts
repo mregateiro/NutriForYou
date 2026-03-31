@@ -167,6 +167,12 @@ Each meal must have 2-5 realistic food items with name, quantity, unit, calories
 Use varied, nutritious, real food items appropriate for each meal type. Avoid placeholders.`
 }
 
+/** Default fallback models to try when the primary model is unavailable */
+const DEFAULT_FALLBACK_MODELS = [
+  'google/gemini-2.0-flash-001',
+  'meta-llama/llama-3.1-8b-instruct:free',
+]
+
 async function callAI(prompt: string): Promise<AIMealPlanDay[]> {
   const apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY
   if (!apiKey || apiKey === 'sk-...') {
@@ -174,27 +180,85 @@ async function callAI(prompt: string): Promise<AIMealPlanDay[]> {
   }
 
   const baseUrl = process.env.AI_BASE_URL || 'https://openrouter.ai/api/v1'
-  const model = process.env.AI_MODEL || 'openai/gpt-4o'
+  const primaryModel = process.env.AI_MODEL || 'openai/gpt-4o'
+
+  const fallbackModels = process.env.AI_FALLBACK_MODELS
+    ? process.env.AI_FALLBACK_MODELS.split(',').map(m => m.trim()).filter(Boolean)
+    : DEFAULT_FALLBACK_MODELS
+
+  const modelsToTry = [primaryModel, ...fallbackModels]
+  const isOpenRouter = baseUrl.includes('openrouter.ai')
+
+  if (modelsToTry.length === 0) {
+    throw new Error('No AI models configured. Set AI_MODEL env var.')
+  }
+
+  let lastError: Error | null = null
+
+  for (const model of modelsToTry) {
+    try {
+      const result = await callAIWithModel(baseUrl, apiKey, model, prompt, isOpenRouter)
+      return result
+    } catch (error) {
+      lastError = error as Error
+      const is404 = lastError.message.includes(': 404 ')
+      if (is404 && model !== modelsToTry[modelsToTry.length - 1]) {
+        logger.warn({ model, error: lastError.message }, 'Model unavailable, trying next fallback')
+        continue
+      }
+      throw lastError
+    }
+  }
+
+  throw lastError!
+}
+
+async function callAIWithModel(
+  baseUrl: string,
+  apiKey: string,
+  model: string,
+  prompt: string,
+  isOpenRouter: boolean,
+): Promise<AIMealPlanDay[]> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${apiKey}`,
+  }
+
+  // OpenRouter recommends these headers for proper routing
+  if (isOpenRouter) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://nutriforyou.app'
+    headers['HTTP-Referer'] = appUrl
+    headers['X-Title'] = 'NutriForYou'
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const requestBody: Record<string, any> = {
+    model,
+    messages: [
+      {
+        role: 'system',
+        content: 'You are a professional nutritionist assistant. Generate structured meal plans in JSON format. Return only valid JSON array.',
+      },
+      { role: 'user', content: prompt },
+    ],
+    response_format: { type: 'json_object' },
+    temperature: 0.7,
+    max_tokens: 4000,
+  }
+
+  // OpenRouter provider settings to avoid privacy/data policy 404s
+  if (isOpenRouter) {
+    requestBody.provider = {
+      allow_fallbacks: true,
+      data_collection: 'allow',
+    }
+  }
 
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a professional nutritionist assistant. Generate structured meal plans in JSON format. Return only valid JSON array.',
-        },
-        { role: 'user', content: prompt },
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.7,
-      max_tokens: 4000,
-    }),
+    headers,
+    body: JSON.stringify(requestBody),
   })
 
   if (!response.ok) {
