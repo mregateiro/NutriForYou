@@ -240,6 +240,59 @@ describe('generateMealPlan', () => {
     expect(secondCallBody.model).toBe('fallback-model-1')
   })
 
+  it('retries with fallback models on JSON parse errors (truncated response)', async () => {
+    vi.stubEnv('AI_FALLBACK_MODELS', 'fallback-model-1,fallback-model-2')
+
+    const patient = buildPatient({ id: 'patient-1', nutritionistId: 'nutri-1' })
+    const mealPlan = buildMealPlan({ id: 'mp-6', aiGenerated: true })
+
+    prisma.patient.findFirst.mockResolvedValue(patient)
+    prisma.mealPlan.create.mockResolvedValue(mealPlan)
+
+    // First call returns truncated JSON (simulating token limit)
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        choices: [{
+          message: {
+            content: '{"days":[{"dayOfWeek":"MONDAY","meals":[{"mealType":"BREAKFAST","name":"Oat',
+          },
+        }],
+      }),
+    })
+    // Second call (fallback model) succeeds
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        choices: [{
+          message: {
+            content: JSON.stringify([{
+              dayOfWeek: 'MONDAY',
+              meals: [{
+                mealType: 'BREAKFAST',
+                name: 'Oatmeal',
+                time: '08:00',
+                foodItems: [{
+                  name: 'Oats', quantity: 100, unit: 'g',
+                  calories: 389, protein: 17, carbs: 66, fat: 7,
+                }],
+              }],
+            }]),
+          },
+        }],
+      }),
+    })
+
+    const { generateMealPlan } = await import('@/services/ai-meal-plan.service')
+    const result = await generateMealPlan('nutri-1', defaultInput as never)
+
+    expect(result).toEqual(mealPlan)
+    expect(mockFetch).toHaveBeenCalledTimes(2)
+
+    const secondCallBody = JSON.parse(mockFetch.mock.calls[1][1].body)
+    expect(secondCallBody.model).toBe('fallback-model-1')
+  })
+
   it('does not add OpenRouter headers for non-OpenRouter base URLs', async () => {
     vi.stubEnv('AI_BASE_URL', 'https://api.openai.com/v1')
 
