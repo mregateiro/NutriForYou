@@ -201,10 +201,8 @@ async function callAI(prompt: string): Promise<AIMealPlanDay[]> {
       return result
     } catch (error) {
       lastError = error as Error
-      const isRetryable = lastError.message.includes(': 404 ')
-        || lastError.name === 'SyntaxError'
-        || lastError.message.includes('Unterminated string')
-        || lastError.message.includes('Unexpected end of JSON')
+      const isRetryable = lastError.name === 'SyntaxError'
+        || lastError.message.includes(': 404 ')
         || lastError.message.includes('Empty response')
       if (isRetryable && model !== modelsToTry[modelsToTry.length - 1]) {
         logger.warn({ model, error: lastError.message }, 'Model unavailable, trying next fallback')
@@ -305,18 +303,18 @@ function tryParseJSON(content: string): { days?: AIMealPlanDay[] } & AIMealPlanD
   if (cutPoint > 0) {
     repaired = repaired.substring(0, cutPoint + 1)
 
-    // Count open brackets and close them
-    let openBraces = 0
-    let openBrackets = 0
+    // Count open brackets and close them in correct nesting order
+    const openStack: string[] = []
     for (const ch of repaired) {
-      if (ch === '{') openBraces++
-      else if (ch === '}') openBraces--
-      else if (ch === '[') openBrackets++
-      else if (ch === ']') openBrackets--
+      if (ch === '{' || ch === '[') openStack.push(ch)
+      else if (ch === '}' || ch === ']') openStack.pop()
     }
 
-    while (openBrackets > 0) { repaired += ']'; openBrackets-- }
-    while (openBraces > 0) { repaired += '}'; openBraces-- }
+    // Close in reverse order (innermost first)
+    while (openStack.length > 0) {
+      const opener = openStack.pop()
+      repaired += opener === '{' ? '}' : ']'
+    }
 
     try {
       const result = JSON.parse(repaired)
