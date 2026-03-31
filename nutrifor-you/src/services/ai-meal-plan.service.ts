@@ -170,7 +170,7 @@ Use varied, nutritious, real food items appropriate for each meal type. Avoid pl
 /** Default fallback models to try when the primary model is unavailable */
 const DEFAULT_FALLBACK_MODELS = [
   'google/gemini-2.0-flash-001',
-  'meta-llama/llama-3.1-8b-instruct:free',
+  'meta-llama/llama-3.3-70b-instruct',
 ]
 
 async function callAI(prompt: string): Promise<AIMealPlanDay[]> {
@@ -201,8 +201,12 @@ async function callAI(prompt: string): Promise<AIMealPlanDay[]> {
       return result
     } catch (error) {
       lastError = error as Error
-      const is404 = lastError.message.includes(': 404 ')
-      if (is404 && model !== modelsToTry[modelsToTry.length - 1]) {
+      const isRetryable = lastError.message.includes(': 404 ')
+        || lastError.name === 'SyntaxError'
+        || lastError.message.includes('Unterminated string')
+        || lastError.message.includes('Unexpected end of JSON')
+        || lastError.message.includes('Empty response')
+      if (isRetryable && model !== modelsToTry[modelsToTry.length - 1]) {
         logger.warn({ model, error: lastError.message }, 'Model unavailable, trying next fallback')
         continue
       }
@@ -244,7 +248,7 @@ async function callAIWithModel(
     ],
     response_format: { type: 'json_object' },
     temperature: 0.7,
-    max_tokens: 4000,
+    max_tokens: 8192,
   }
 
   // OpenRouter provider settings to avoid privacy/data policy 404s
@@ -271,8 +275,62 @@ async function callAIWithModel(
 
   if (!content) throw new Error('Empty response from AI')
 
-  const parsed = JSON.parse(content)
+  const parsed = tryParseJSON(content)
   return parsed.days || parsed
+}
+
+/**
+ * Attempt to parse JSON content, with basic repair for truncated responses.
+ * AI models can hit token limits and return truncated JSON.
+ */
+function tryParseJSON(content: string): { days?: AIMealPlanDay[] } & AIMealPlanDay[] {
+  // First try direct parse
+  try {
+    return JSON.parse(content)
+  } catch {
+    // Attempt to repair truncated JSON by closing open brackets
+    logger.warn('AI response is not valid JSON, attempting repair')
+  }
+
+  // Try to find the last complete meal object and close the JSON
+  let repaired = content.trim()
+
+  // Remove any trailing incomplete string or value
+  // Find the last complete object by looking for the last },
+  const lastCompleteComma = repaired.lastIndexOf('},')
+  const lastCompleteBrace = repaired.lastIndexOf('}]')
+
+  const cutPoint = Math.max(lastCompleteComma, lastCompleteBrace)
+
+  if (cutPoint > 0) {
+    repaired = repaired.substring(0, cutPoint + 1)
+
+    // Count open brackets and close them
+    let openBraces = 0
+    let openBrackets = 0
+    for (const ch of repaired) {
+      if (ch === '{') openBraces++
+      else if (ch === '}') openBraces--
+      else if (ch === '[') openBrackets++
+      else if (ch === ']') openBrackets--
+    }
+
+    while (openBrackets > 0) { repaired += ']'; openBrackets-- }
+    while (openBraces > 0) { repaired += '}'; openBraces-- }
+
+    try {
+      const result = JSON.parse(repaired)
+      logger.info('Successfully repaired truncated AI JSON response')
+      return result
+    } catch {
+      // Repair failed, throw original error
+    }
+  }
+
+  // If repair fails, re-parse to throw the original SyntaxError
+  JSON.parse(content)
+  // Should never reach here, but just in case:
+  throw new Error('Failed to parse AI response as JSON')
 }
 
 /** Sample food items per meal type for the fallback plan */
