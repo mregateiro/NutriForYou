@@ -189,6 +189,10 @@ async function callAI(prompt: string): Promise<AIMealPlanDay[]> {
   const modelsToTry = [primaryModel, ...fallbackModels]
   const isOpenRouter = baseUrl.includes('openrouter.ai')
 
+  if (modelsToTry.length === 0) {
+    throw new Error('No AI models configured. Set AI_MODEL env var.')
+  }
+
   let lastError: Error | null = null
 
   for (const model of modelsToTry) {
